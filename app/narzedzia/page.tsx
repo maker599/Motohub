@@ -123,7 +123,8 @@ export default function ToolsPage(){
   const pad=48;
   const scale=Math.min(1180/Math.max(maxX-minX,1),560/Math.max(maxY-minY,1));
   const tx=(x:number)=>pad+(x-minX)*scale;
-  const yOffset=55;\n  const ty=(y:number)=>pad+(maxY-y)*scale+yOffset;
+  const yOffset=55;
+  const ty=(y:number)=>pad+(maxY-y)*scale+yOffset;
   const outlineTop:string[]=[];
   const outlineBottom:string[]=[];
   for(let k=0;k<pts.length;k++){
