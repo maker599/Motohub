@@ -1,4 +1,6 @@
 import Link from "next/link";
+
+export const instant = false;
 import AddToGarage from "./AddToGarage";
 
 const bikes: Record<string, {brand:string; model:string; year:number; engine:string; power:string; type:string; weight:string}> = {
