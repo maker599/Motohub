@@ -123,7 +123,7 @@ export default function ToolsPage(){
   const pad=48;
   const scale=Math.min(1180/Math.max(maxX-minX,1),560/Math.max(maxY-minY,1));
   const tx=(x:number)=>pad+(x-minX)*scale;
-  const ty=(y:number)=>pad+(maxY-y)*scale;
+  const yOffset=55;\n  const ty=(y:number)=>pad+(maxY-y)*scale+yOffset;
   const outlineTop:string[]=[];
   const outlineBottom:string[]=[];
   for(let k=0;k<pts.length;k++){
@@ -156,7 +156,7 @@ export default function ToolsPage(){
    };
   })();
   const viewWidth=(maxX-minX)*scale+pad*2;
-  const viewHeight=(maxY-minY)*scale+pad*2;
+  const viewHeight=(maxY-minY)*scale+pad*2+yOffset*2;
   return {outline,center,seams,flange,scale,viewWidth,viewHeight,viewBox:`0 0 ${viewWidth} ${viewHeight}`};
  },[r,bend,bend2]);
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
