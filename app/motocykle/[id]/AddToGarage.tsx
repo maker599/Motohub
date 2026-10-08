@@ -5,6 +5,8 @@ export default function AddToGarage({ slug, defaultYear }: { slug: string; defau
   const [status, setStatus] = useState("");
   const [year, setYear] = useState(String(defaultYear));
   const [color, setColor] = useState("Czarny");
+  const currentYear = new Date().getFullYear();
+  const minYear = Math.max(1990, defaultYear - 10);
   const colors = [
     { name: "Czarny", hex: "#18181b" }, { name: "Biały", hex: "#f4f4f5" },
     { name: "Czerwony", hex: "#dc2626" }, { name: "Niebieski", hex: "#2563eb" },
@@ -30,7 +32,7 @@ export default function AddToGarage({ slug, defaultYear }: { slug: string; defau
       <label className="block">
         <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-500">Rocznik</span>
         <select value={year} onChange={(e) => setYear(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-500/40">
-          {Array.from({ length: 21 }, (_, i) => defaultYear - 10 + i).map((y) => <option key={y} value={y}>{y}</option>)}
+          {Array.from({ length: currentYear - minYear + 1 }, (_, i) => minYear + i).reverse().map((y) => <option key={y} value={y}>{y}</option>)}
         </select>
       </label>
       <label className="block">
