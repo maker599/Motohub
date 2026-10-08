@@ -83,9 +83,8 @@ export default function ToolsPage(){
   // Realistic packaging: one exhaust elbow, plus a separate "push-out" control.
   // The second control bends the whole route outward smoothly instead of creating a second elbow.
   const elbowAngle=rad(Math.min(180,Math.max(0,bend)));
-  const elbowLen=Math.min(total*.16,Math.max(70,total*.10));
-  const naturalRadius=Math.max(r.d1*3.0,elbowLen/Math.max(elbowAngle,.35));
-  const elbowRadius=elbowAngle>0.02?naturalRadius:Math.max(r.d1*3,elbowLen);
+  const elbowLen=Math.min(total*.12,Math.max(45,total*.08));
+  const elbowRadius=Math.max(35,elbowLen/Math.max(elbowAngle,.35));
   const headerLen=Math.max(45,r.header*.45);
   const firstEnd=headerLen+elbowLen;
   const chamberStart=firstEnd;
@@ -161,7 +160,7 @@ export default function ToolsPage(){
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
    <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.3em] text-red-500">MotoHub / Narzędzia</p><h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">2T Exhaust Lab</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">Zaawansowany kalkulator geometrii komory rezonansowej 2T. Długość strojoną liczy z czasu otwarcia portu, temperatury gazów i obrotów docelowych, a następnie rozkłada ją na sekcje stożkowe.</p></div><div className="rounded-2xl border border-amber-500/20 bg-amber-500/[.06] px-4 py-3 text-xs leading-5 text-amber-200"><b>Projekt wstępny</b><br/>Nie zastępuje pomiarów i testów na hamowni.</div></div>
   </div>
-  <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/[.045] p-4"><div className="flex gap-3"><span className="mt-0.5 text-red-400">ⓘ</span><div><p className="text-sm font-bold">Jak czytać parametry?</p><p className="mt-1 text-xs leading-5 text-zinc-400">Najedź na znak <b className="text-zinc-200">?</b> przy parametrze, aby zobaczyć co oznacza i jak go zmierzyć. Zmiana dowolnej wartości od razu aktualizuje długość strojoną, średnice, rozwinięcia blach i podgląd 2D.</p></div></div></div>
+  <div className="mt-8 rounded-2xl border border-white/10 bg-white/[.025] p-4"><div className="flex gap-3"><span className="mt-0.5 text-zinc-400">✦</span><div><p className="text-sm font-bold">Wskazówki do ustawiania parametrów</p><p className="mt-1 text-xs leading-5 text-zinc-400">Najedź na znak <b className="text-zinc-200">?</b> przy parametrze, aby zobaczyć co oznacza i jak go zmierzyć. Każda zmiana od razu aktualizuje geometrię, rozwinięcia blach i podgląd wydechu.</p></div></div></div>
   <div className="mt-8 grid gap-5 xl:grid-cols-[360px_1fr]">
    <section className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><div className="flex items-center justify-between"><div><h2 className="font-bold">Parametry silnika</h2><p className="mt-1 text-xs text-zinc-500">Najlepiej wpisywać wartości zmierzone.</p></div><button onClick={()=>setI(defaults)} className="text-xs text-zinc-500 hover:text-white">Reset</button></div>
     <div className="mt-5 space-y-4">
