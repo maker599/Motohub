@@ -32,6 +32,19 @@ export default function ToolsPage(){
  const [lastPointerY,setLastPointerY]=useState(0);
  const canvasRef=useRef<HTMLCanvasElement|null>(null);
  const set=(k:keyof Inputs,v:string)=>setI(x=>({...x,[k]:v===""?0:Number(v)}));
+ const r=useMemo(()=>{
+  const wave=Math.sqrt(Math.max(.1,i.gamma)*287*(i.egt+273.15));
+  const available=Math.max(20,i.targetReturn-i.exhaustOpen);
+  const tuned=wave*available/(12*Math.max(1,i.rpm))*1000;
+  const d1=Math.max(1,i.headerDiameter||i.exhaustPortDiameter),d2=d1*Math.sqrt(1.55),d3=d1*Math.sqrt(3.35),dmax=d1*Math.max(1.1,i.bellyRatio);
+  const l1=cone(d1,d2,i.diffuser1),l2=cone(d2,d3,i.diffuser2),l3=cone(d3,dmax,i.diffuser3);
+  const belly=Math.max(20,tuned*.10),stinger=Math.max(3,dmax*i.stingerRatio), baffle=cone(dmax,stinger,i.baffleAngle);
+  const stingerLength=stinger*Math.max(3,i.stingerLengthRatio), header=Math.max(30,tuned-l1-l2-l3-belly-baffle);
+  const portArea=Math.PI*Math.pow(i.exhaustPortDiameter/2,2),portRectArea=Math.max(0,i.exhaustPortDiameter*i.exhaustPortHeight);
+  const effectivePortArea=Math.max(portArea,portRectArea),bellyAreaRatio=(dmax/d1)**2,stingerAreaRatio=(stinger/dmax)**2,total=header+l1+l2+l3+belly+baffle+stingerLength,balance=tuned-total;
+  return {wave,available,tuned,d1,d2,d3,dmax,l1,l2,l3,belly,baffle,stinger,stingerLength,header,
+    disp:Math.PI/4*i.bore*i.bore*i.stroke*i.cylinders/1000,ratio:(dmax/d1)**2,portArea,effectivePortArea,bellyAreaRatio,stingerAreaRatio,total,balance};
+ },[i]);
  useEffect(()=>{
   const canvas=canvasRef.current;if(!canvas)return;
   const ctx=canvas.getContext("2d");if(!ctx)return;
@@ -94,19 +107,7 @@ export default function ToolsPage(){
   draw();
   const ro=()=>{resize();draw()};window.addEventListener("resize",ro);return()=>window.removeEventListener("resize",ro);
  },[r,bend,yaw,pitch]);
- const r=useMemo(()=>{
-  const wave=Math.sqrt(Math.max(.1,i.gamma)*287*(i.egt+273.15));
-  const available=Math.max(20,i.targetReturn-i.exhaustOpen);
-  const tuned=wave*available/(12*Math.max(1,i.rpm))*1000;
-  const d1=Math.max(1,i.headerDiameter||i.exhaustPortDiameter),d2=d1*Math.sqrt(1.55),d3=d1*Math.sqrt(3.35),dmax=d1*Math.max(1.1,i.bellyRatio);
-  const l1=cone(d1,d2,i.diffuser1),l2=cone(d2,d3,i.diffuser2),l3=cone(d3,dmax,i.diffuser3);
-  const belly=Math.max(20,tuned*.10),stinger=Math.max(3,dmax*i.stingerRatio), baffle=cone(dmax,stinger,i.baffleAngle);
-  const stingerLength=stinger*Math.max(3,i.stingerLengthRatio), header=Math.max(30,tuned-l1-l2-l3-belly-baffle);
-  const portArea=Math.PI*Math.pow(i.exhaustPortDiameter/2,2),portRectArea=Math.max(0,i.exhaustPortDiameter*i.exhaustPortHeight);
-  const effectivePortArea=Math.max(portArea,portRectArea),bellyAreaRatio=(dmax/d1)**2,stingerAreaRatio=(stinger/dmax)**2,total=header+l1+l2+l3+belly+baffle+stingerLength,balance=tuned-total;
-  return {wave,available,tuned,d1,d2,d3,dmax,l1,l2,l3,belly,baffle,stinger,stingerLength,header,
-    disp:Math.PI/4*i.bore*i.bore*i.stroke*i.cylinders/1000,ratio:(dmax/d1)**2,portArea,effectivePortArea,bellyAreaRatio,stingerAreaRatio,total,balance};
- },[i]);
+
  const seg:Array<[string,number,number,number]>=[["Rura wlotowa",r.header,r.d1,r.d1],["Dyfuzor 1",r.l1,r.d1,r.d2],["Dyfuzor 2",r.l2,r.d2,r.d3],["Dyfuzor 3",r.l3,r.d3,r.dmax],["Belly",r.belly,r.dmax,r.dmax],["Przeciwstożek",r.baffle,r.dmax,r.stinger],["Stinger",r.stingerLength,r.stinger,r.stinger]];
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
