@@ -79,19 +79,16 @@ export default function ToolsPage(){
    return r.stinger*.88;
   };
 
-  // Typical 2T packaging: cylinder flange -> short header -> one exhaust elbow -> chamber.
-  // No U-bend: the elbow only changes the direction of the pipe once.
+  // Realistic packaging: one exhaust elbow, plus a separate "push-out" control.
+  // The second control bends the whole route outward smoothly instead of creating a second elbow.
   const elbowAngle=rad(Math.min(180,Math.max(0,bend)));
-  const elbowAngle2=rad(Math.min(180,Math.max(0,bend2)));
   const elbowLen=Math.min(total*.12,Math.max(45,total*.08));
-  const elbowLen2=Math.min(total*.12,Math.max(45,total*.08));
   const elbowRadius=Math.max(35,elbowLen/Math.max(elbowAngle,.35));
-  const elbowRadius2=Math.max(35,elbowLen2/Math.max(elbowAngle2,.35));
   const headerLen=Math.max(45,r.header*.45);
   const firstEnd=headerLen+elbowLen;
-  const secondEnd=firstEnd+elbowLen2;
-  const chamberStart=secondEnd;
+  const chamberStart=firstEnd;
   const bodyLen=Math.max(1,total-chamberStart);
+  const bulge=Math.min(1,Math.max(0,bend2)/100)*Math.max(0,bodyLen*.22);
 
   for(let k=0;k<=n;k++){
    const s=total*k/n;
@@ -104,26 +101,16 @@ export default function ToolsPage(){
     x=headerLen+elbowRadius*Math.sin(a);
     y=-elbowRadius*(1-Math.cos(a));
     tx=Math.cos(a);ty=-Math.sin(a);
-   }else if(s<=secondEnd){
-    const q=(s-firstEnd)/Math.max(elbowLen2,1);
-    const a=elbowAngle*q;
-    const b=elbowAngle2*q;
-    const ex=headerLen+elbowRadius*Math.sin(elbowAngle);
-    const ey=-elbowRadius*(1-Math.cos(elbowAngle));
-    const dirX=Math.cos(elbowAngle),dirY=-Math.sin(elbowAngle);
-    x=ex+elbowRadius2*(Math.sin(b))*dirX+elbowRadius2*(1-Math.cos(b))*dirY;
-    y=ey+elbowRadius2*(Math.sin(b))*dirY-elbowRadius2*(1-Math.cos(b))*dirX;
-    const tangentAngle=elbowAngle+elbowAngle2*q;
-    tx=Math.cos(tangentAngle);ty=-Math.sin(tangentAngle);
    }else{
     const q=(s-chamberStart)/bodyLen;
     const ex=headerLen+elbowRadius*Math.sin(elbowAngle);
     const ey=-elbowRadius*(1-Math.cos(elbowAngle));
-    const endX=ex+elbowRadius2*Math.sin(elbowAngle2)*Math.cos(elbowAngle)+elbowRadius2*(1-Math.cos(elbowAngle2))*(-Math.sin(elbowAngle));
-    const endY=ey+elbowRadius2*Math.sin(elbowAngle2)*(-Math.sin(elbowAngle))-elbowRadius2*(1-Math.cos(elbowAngle2))*Math.cos(elbowAngle);
-    const finalAngle=elbowAngle+elbowAngle2;
-    x=endX+bodyLen*q*Math.cos(finalAngle);
-    y=endY-bodyLen*q*Math.sin(finalAngle);
+    const finalAngle=elbowAngle;
+    const centerX=ex+bodyLen*q*Math.cos(finalAngle);
+    const centerY=ey-bodyLen*q*Math.sin(finalAngle);
+    const push=Math.sin(Math.PI*q)*bulge;
+    x=centerX+push*(-Math.sin(finalAngle));
+    y=centerY+push*(-Math.cos(finalAngle));
     tx=Math.cos(finalAngle);ty=-Math.sin(finalAngle);
    }
    pts.push({x,y,w:widthAt(s),s});
@@ -172,6 +159,7 @@ export default function ToolsPage(){
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
    <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.3em] text-red-500">MotoHub / Narzędzia</p><h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">2T Exhaust Lab</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">Zaawansowany kalkulator geometrii komory rezonansowej 2T. Długość strojoną liczy z czasu otwarcia portu, temperatury gazów i obrotów docelowych, a następnie rozkłada ją na sekcje stożkowe.</p></div><div className="rounded-2xl border border-amber-500/20 bg-amber-500/[.06] px-4 py-3 text-xs leading-5 text-amber-200"><b>Projekt wstępny</b><br/>Nie zastępuje pomiarów i testów na hamowni.</div></div>
   </div>
+  <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/[.045] p-4"><div className="flex gap-3"><span className="mt-0.5 text-red-400">ⓘ</span><div><p className="text-sm font-bold">Jak czytać parametry?</p><p className="mt-1 text-xs leading-5 text-zinc-400">Najedź na znak <b className="text-zinc-200">?</b> przy parametrze, aby zobaczyć co oznacza i jak go zmierzyć. Zmiana dowolnej wartości od razu aktualizuje długość strojoną, średnice, rozwinięcia blach i podgląd 2D.</p></div></div></div>
   <div className="mt-8 grid gap-5 xl:grid-cols-[360px_1fr]">
    <section className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><div className="flex items-center justify-between"><div><h2 className="font-bold">Parametry silnika</h2><p className="mt-1 text-xs text-zinc-500">Najlepiej wpisywać wartości zmierzone.</p></div><button onClick={()=>setI(defaults)} className="text-xs text-zinc-500 hover:text-white">Reset</button></div>
     <div className="mt-5 space-y-4">
@@ -193,8 +181,8 @@ export default function ToolsPage(){
     <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.035]">
       <div className="border-b border-white/10 px-5 py-5">
        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div><p className="text-[10px] font-black uppercase tracking-[.2em] text-red-400">Pakowanie wydechu</p><h2 className="mt-1 font-bold">Geometria kolanek</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">Dwa niezależne kąty pozwalają ustawić kierunek pierwszego i drugiego odcinka. Dzięki temu łatwiej zaplanować przejście obok ramy, wahacza lub pod siedzeniem.</p></div>
-        <div className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2 text-right"><p className="text-[9px] uppercase tracking-widest text-zinc-600">Łączna zmiana kierunku</p><p className="font-mono text-lg font-black">{Math.min(180,bend)}° + {Math.min(180,bend2)}°</p></div>
+        <div><p className="text-[10px] font-black uppercase tracking-[.2em] text-red-400">Pakowanie wydechu</p><h2 className="mt-1 font-bold">Geometria kolanek</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">Pierwszy parametr ustawia faktyczne kolanko przy cylindrze. Drugi nie tworzy kolejnego kolanka — płynnie wypycha cały dalszy przebieg, dzięki czemu możesz nadać wydechowi bardziej zaokrąglony, naturalny kształt i ominąć ramę, wahacz lub siedzenie.</p></div>
+        <div className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2 text-right"><p className="text-[9px] uppercase tracking-widest text-zinc-600">Kolanko + wypchnięcie</p><p className="font-mono text-lg font-black">{Math.min(180,bend)}° · {Math.min(100,bend2)}%</p></div>
        </div>
        <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
@@ -203,13 +191,14 @@ export default function ToolsPage(){
          <div className="mt-2 flex justify-between text-[10px] text-zinc-600"><span>0° prosto</span><span>90°</span><span>180° zawinięcie</span></div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-         <div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Kolanko 2</p><p className="mt-1 text-sm font-semibold">Druga zmiana kierunku</p></div><span className="rounded-lg bg-white/[.06] px-2 py-1 font-mono text-lg font-black">{Math.min(180,bend2)}°</span></div>
-         <input aria-label="Kąt drugiego kolanka" type="range" min="0" max="180" value={Math.min(180,bend2)} onChange={e=>setBend2(Number(e.target.value))} className="mt-4 w-full accent-red-500"/>
-         <div className="mt-2 flex justify-between text-[10px] text-zinc-600"><span>0° prosto</span><span>90°</span><span>180° zawinięcie</span></div>
+         <div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Wypchnięcie</p><p className="mt-1 text-sm font-semibold">Zaokrąglenie całego przebiegu</p></div><span className="rounded-lg bg-white/[.06] px-2 py-1 font-mono text-lg font-black">{Math.min(100,bend2)}%</span></div>
+         <input aria-label="Wypchnięcie i zaokrąglenie całego przebiegu wydechu" type="range" min="0" max="100" value={Math.min(100,bend2)} onChange={e=>setBend2(Number(e.target.value))} className="mt-4 w-full accent-red-500"/>
+         <div className="mt-2 flex justify-between text-[10px] text-zinc-600"><span>0% prosty</span><span>50% łuk</span><span>100% mocno wypchnięty</span></div>
+         <p className="mt-3 text-[11px] leading-5 text-zinc-500">To nie jest drugie kolanko. Parametr wypycha cały dalszy przebieg na bok płynnym łukiem, żeby komora nie wyglądała jak załamany „rogal”.</p>
         </div>
        </div>
       </div>
-      <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy typowej komory 2T: flansza przy cylindrze, krótki header, pojedyncze kolanko, następnie dyfuzory, belly, przeciwstożek i stinger.</p></div>
+      <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy typowej komory 2T: flansza przy cylindrze, krótki header, płynne kolanko, dyfuzory, belly, przeciwstożek i stinger. Wypchnięcie wpływa na cały przebieg osiowy, nie tylko na jeden fragment.</p></div>
       <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
        <div className="relative min-h-[620px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
         <svg viewBox={profile.viewBox} className="h-auto min-h-[620px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
@@ -231,7 +220,7 @@ export default function ToolsPage(){
         </svg>
         <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
-         <p className="mt-1 text-xs text-zinc-300">Kolanka: {Math.min(180,bend)}° / {Math.min(180,bend2)}° · LPM: {Math.round(r.total)} mm</p>
+         <p className="mt-1 text-xs text-zinc-300">Kolanko: {Math.min(180,bend)}° · Wypchnięcie: {Math.min(100,bend2)}% · LPM: {Math.round(r.total)} mm</p>
         </div>
        </div>
       </div>    </div><div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Rozwinięcia blach do wycięcia</h2><p className="mt-1 text-xs text-zinc-500">Dla prostych sekcji pokazuję rzeczywiste wymiary rozwinięcia przed walcowaniem i stożkowaniem, a nie samą długość osiową.</p><div className="mt-4 overflow-x-auto rounded-2xl border border-white/10"><table className="w-full min-w-[760px] text-sm"><thead className="bg-white/[.04] text-[11px] text-zinc-500"><tr><th className="px-3 py-3 text-left">Detal</th><th className="px-3 py-3 text-left">Typ rozwinięcia</th><th className="px-3 py-3 text-right">Dł. osiowa</th><th className="px-3 py-3 text-right">Szer. blachy</th><th className="px-3 py-3 text-right">D1</th><th className="px-3 py-3 text-right">D2</th><th className="px-3 py-3 text-right">Skos / kąt</th></tr></thead><tbody>
