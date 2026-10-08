@@ -68,16 +68,17 @@ export default function ToolsPage(){
   const total=Math.max(r.total,1);
   const n=240;
   const pts:{x:number;y:number;w:number;s:number}[]=[];
+  const visualWidthFactor=1.18;
   const widthAt=(s:number)=>{
    let acc=0;
    for(const [,len,a,b] of seg){
     if(s<=acc+len){
      const t=(s-acc)/Math.max(len,1);
-     return (a+(b-a)*t)/2;
+     return ((a+(b-a)*t)/2)*visualWidthFactor;
     }
     acc+=len;
    }
-   return r.stinger*.88;
+   return r.stinger*.88*visualWidthFactor;
   };
 
   // Realistic packaging: one exhaust elbow, plus a separate "push-out" control.
@@ -119,7 +120,7 @@ export default function ToolsPage(){
 
   const minX=Math.min(...pts.map(p=>p.x-p.w))-55,maxX=Math.max(...pts.map(p=>p.x+p.w))+55;
   const minY=Math.min(...pts.map(p=>p.y-p.w))-55,maxY=Math.max(...pts.map(p=>p.y+p.w))+55;
-  const pad=70;
+  const pad=48;
   const scale=Math.min(1180/Math.max(maxX-minX,1),560/Math.max(maxY-minY,1));
   const tx=(x:number)=>pad+(x-minX)*scale;
   const ty=(y:number)=>pad+(maxY-y)*scale;
@@ -154,7 +155,11 @@ export default function ToolsPage(){
     cx:cX,cy:cY
    };
   })();
-  return {outline,center,seams,flange,viewBox:`0 0 ${Math.max(1320,(maxX-minX)*scale+pad*2)} ${Math.max(700,(maxY-minY)*scale+pad*2)}`};
+  const viewWidth=(maxX-minX)*scale+pad*2;
+  const viewHeight=(maxY-minY)*scale+pad*2;
+  const scaleBarMm=200;
+  const scaleBarPx=scaleBarMm*scale;
+  return {outline,center,seams,flange,scale,viewWidth,viewHeight,scaleBarMm,scaleBarPx,viewBox:`0 0 ${viewWidth} ${viewHeight}`};
  },[r,bend,bend2]);
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
@@ -201,8 +206,8 @@ export default function ToolsPage(){
       </div>
       <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy typowej komory 2T: flansza przy cylindrze, krótki header, płynne kolanko, dyfuzory, belly, przeciwstożek i stinger. Wypchnięcie wpływa na cały przebieg osiowy, nie tylko na jeden fragment.</p></div>
       <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
-       <div className="relative min-h-[620px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
-        <svg viewBox={profile.viewBox} className="h-auto min-h-[620px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
+       <div className="relative min-h-[500px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
+        <svg viewBox={profile.viewBox} className="h-auto max-h-[500px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
          <defs>
           <linearGradient id="pipeMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d7d9dc"/><stop offset=".22" stopColor="#6f7278"/><stop offset=".5" stopColor="#222428"/><stop offset=".78" stopColor="#85888e"/><stop offset="1" stopColor="#17181b"/></linearGradient>
           <linearGradient id="bellyHot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9b2920"/><stop offset=".45" stopColor="#e55335"/><stop offset="1" stopColor="#4c0e0c"/></linearGradient>
@@ -218,6 +223,13 @@ export default function ToolsPage(){
          {profile.seams.map((s,n)=><line key={n} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke="#050505" strokeOpacity=".65" strokeWidth="2"/>)}
          <text x="42" y="34" fill="#777" fontSize="12" fontFamily="system-ui" letterSpacing="2">2T EXPANSION CHAMBER</text>
          <text x="42" y="52" fill="#555" fontSize="10" fontFamily="system-ui">Ø rośnie do belly, następnie maleje do przeciwstożka / stinger</text>
+         <g transform={`translate(48 ${profile.viewHeight-34})`}>
+          <line x1="0" y1="0" x2={profile.scaleBarPx} y2="0" stroke="#d4d4d8" strokeWidth="2"/>
+          <line x1="0" y1="-6" x2="0" y2="6" stroke="#d4d4d8" strokeWidth="2"/>
+          <line x1={profile.scaleBarPx} y1="-6" x2={profile.scaleBarPx} y2="6" stroke="#d4d4d8" strokeWidth="2"/>
+          <text x={profile.scaleBarPx/2} y="-10" textAnchor="middle" fill="#a1a1aa" fontSize="10" fontFamily="monospace">20 cm</text>
+          <text x={profile.scaleBarPx+10} y="4" fill="#52525b" fontSize="9" fontFamily="system-ui">skala orientacyjna</text>
+         </g>
         </svg>
         <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
