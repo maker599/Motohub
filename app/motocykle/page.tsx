@@ -61,15 +61,37 @@ const bikes = [
 
 const types = ["Naked", "Sport", "Adventure", "Touring", "Enduro", "MX", "Cruiser"];
 
-const previewImages = [
-  "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1558981285-6f0c94958bb6?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=85",
-];
+const previewImages: Record<string, string> = {
+  "yamaha-mt07": "https://mcn-images.bauersecure.com/wp-images/292866/822x548/2025-yamaha-mt-07-08.jpg",
+  "yamaha-mt09": "https://soymotero.net/wp-content/uploads/2025/12/Yamaha-MT-09-Y-AMT-2026-1.jpg",
+  "yamaha-yz125": "https://img.stcrm.it/images/38344826/HOR_STD/800x/2025-yamaha-yz125lc-eu-icon_blue-studio-002-03.jpg",
+  "yamaha-yz250": "https://cloudfront-us-east-1.images.arcpublishing.com/octane/BMDGOMSLGFF7XDLBL5DVCTON6Y.jpg",
+  "yamaha-r7": "https://www.2ri.de/Images/Big/8/News_2025-Yamaha-YZF-R7f.jpg",
+  "yamaha-tenere700": "https://d1uzk9o9cg136f.cloudfront.net/f/16782548/rc/2025/03/13/df0f4760e9535b827361846bccdaae76de9f7f89_xlarge.jpg",
+  "honda-cbr650r": "https://images.motoren-toerisme.be/2023-12/2024_honda_cbr650r_01.jpg?auto=format&fit=max&h=1024&ixlib=php-1.1.0&q=65&s=fb115bd4baa892ecb6fa8426b97f8e10",
+  "honda-crf250r": "https://cdn.shopify.com/s/files/1/0578/8722/8063/files/25-honda-crf250r_red_rhp.jpg?v=1748897017",
+  "honda-crf450r": "https://www.konenygard.fi/assets/ProductCatalog/199/SilverShop_Page_Product-198253/honda-CRF450R-2025-6.webp",
+  "honda-rebel500": "https://global.honda/content/dam/site/global-jp/news-new/cq_img/2025/02/2250206-rebel500/web/2250206-rebel500_004L.jpg",
+  "suzuki-gsx8r": "https://actionbike.fr/uploads/pictures/modele_218628995/_xl_image.jpg",
+  "suzuki-gsx8s": "https://moto.suzuki.es/storage/images/a39xfm5kebwqc7dsorrrdbp2lgcfothbkxxwt0pp.jpg",
+  "suzuki-vstrom800": "https://www.motorrad-bilder.at/slideshows/291/023935/V-Strom_8005.jpg",
+  "kawasaki-z900": "https://storage.kawasaki.eu/public/kawasaki.eu/en-EU/model/25ZR900S_40SBK1DRF3CG_A.jpg",
+  "kawasaki-ninja650": "https://www.kawasaki.de/content/dam/products/pim/studio/s/Resource_312886_25EX650P_S_44SGN1DRF3CG_A.jpg",
+  "kawasaki-zx6r": "https://www.kawasaki.no/content/dam/products/pim/studio/nin/Resource_317568_25MY_Ninja_ZX-6R_Performance_GN2_Front.jpg",
+  "kawasaki-kx450": "https://content2.kawasaki.com/ContentStorage/CKM/Products/5437/3c4e13a5-f2be-4e1f-83d3-63e5f645437b.jpg",
+  "ktm-125-duke": "https://www.braeuer-shop.de/wp-content/uploads/PHO_BIKE_90_RE_MY24-KTM-125-DUKE-ORANGE-90-RIGHT-2_SALL_AEPI_V1-1.png",
+  "ktm-890-adventure": "https://azwecdnepstoragewebsiteuploads.azureedge.net/PHO_BIKE_90_REVO_890-ADVENTURE-Black-MY23-90-Front-Right_%23SALL_%23AEPI_%23V1.png",
+  "husqvarna-te300": "https://www.ktm-berlin.de/wp-content/uploads/PHO_BIKE_90_RE_TE-300-MY2025-90-right_SALL_AEPI_V1.png",
+  "husqvarna-svartpilen401": "https://images5.1000ps.net/images_bikekat/2025/42-Husqvarna/8783-Svartpilen_401/005-638720363677107910-husqvarna-svartpilen-401.jpg",
+  "gasgas-ec300": "https://images5.1000ps.net/images_bikekat/2025/8-GASGAS/1351-EC_300/002-638551737335372480-gasgas-ec-300.jpg?bgcolor=rgba_39_42_44_0&format=webp&height=664&mode=pad&quality=80&scale=both&trim.percentpadding=1&trim.threshold=80&width=1168",
+  "beta-rx300": "https://www.almamoto.it/wp-content/uploads/2024/06/nuovo-beta-rx-300-2t-my-2025.jpg",
+  "aprilia-rs660": "https://www.motorrad-bilder.at/slideshows/291/023799/002_aprilia_rs660_2025.jpg",
+  "ducati-monster": "https://images5.1000ps.net/images_bikekat/2025/5-Ducati/10402-Monster/013-638761504417645342-ducati-monster.jpg?bgcolor=rgba_39_42_44_0&format=webp&height=828&mode=pad&quality=80&scale=both&width=1472",
+  "ducati-panigale-v2": "https://www.v-twins.com.au/cdn/shop/files/Panigale-V2-MY25-360_0017_it-18.webp?v=1733455225&width=1622",
+};
 
-function getPreviewImage(index: number) {
-  return previewImages[index % previewImages.length];
+function getPreviewImage(id: string) {
+  return previewImages[id];
 }
 
 const brands = ["Yamaha", "Honda", "Suzuki", "BMW", "Kawasaki", "Ducati", "KTM", "Husqvarna", "GasGas", "Beta", "TM Racing", "Aprilia", "Triumph"];
@@ -148,7 +170,7 @@ export default function MotorcyclesPage() {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {filtered.map((bike) => (
                 <Link key={bike.id} href={"/motocykle/"+bike.id} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.03] transition hover:-translate-y-1 hover:border-red-500/30">
-                  <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900"><img src={getPreviewImage(bikes.indexOf(bike))} alt={`${bike.brand} ${bike.model}`} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /><div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div></div>
+                  <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900"><img src={getPreviewImage(bike.id)} alt={`${bike.brand} ${bike.model}`} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /><div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div></div>
                   <div className="p-5"><p className="text-xs font-bold uppercase tracking-wider text-red-400">{bike.brand}</p><h2 className="mt-1 text-xl font-bold">{bike.model}</h2><div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500"><span>{bike.engine}</span><span>{bike.power}</span><span>{bike.year}</span><span>Sprawdź →</span></div></div>
                 </Link>
               ))}
