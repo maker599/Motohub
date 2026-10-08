@@ -44,6 +44,8 @@ const previewImages: Record<string, string> = {
   "ktm-690-enduro-r": "https://images.motoren-toerisme.be/2025-02/478988_690_enduro_r_my23_us_front-right_usa.jpg?auto=format%2Ccompres&fill=solid&fit=fill&h=880&ixlib=php-1.1.0&q=75&s=787dd45813337f1b5698b3e0edc669b5&w=1320",
   "ducati-multistrada-v2": "https://s1.cdn.autoevolution.com/images/news/gallery/2025-ducati-multistrada-v2-brings-with-it-just-439-pounds-of-pure-crossover-joy_2.jpg",
   "triumph-daytona660": "https://images5.1000ps.net/images_bikekat/2025/37-Triumph/12287-Daytona_660/001-638719365181580216-triumph-daytona-660.jpg?bgcolor=rgba_39_42_44_0&format=webp&height=790&mode=pad&quality=80&width=1200",
+  "suzuki-rm125": "https://partsrepublik.s3.eu-central-1.amazonaws.com/media/vehicle/media/suzuki/model-images/8/6/86b6a8faeb438f1aa875fdb6302a915a.jpg",
+  "aprilia-tuono660": "https://images5.1000ps.net/images_bikekat/2025/9-Aprilia/9957-Tuono_660/002-638720287016691986-aprilia-tuono-660.jpg?bgcolor=rgba_39_42_44_0&format=webp&height=1156&mode=pad&quality=80&scale=both&trim.percentpadding=1&trim.threshold=80&width=1900",
   "husqvarna-te300": "https://www.ktm-berlin.de/wp-content/uploads/PHO_BIKE_90_RE_TE-300-MY2025-90-right_SALL_AEPI_V1.png",
   "husqvarna-svartpilen401": "https://images5.1000ps.net/images_bikekat/2025/42-Husqvarna/8783-Svartpilen_401/005-638720363677107910-husqvarna-svartpilen-401.jpg",
   "gasgas-ec300": "https://images5.1000ps.net/images_bikekat/2025/8-GASGAS/1351-EC_300/002-638551737335372480-gasgas-ec-300.jpg?bgcolor=rgba_39_42_44_0&format=webp&height=664&mode=pad&quality=80&scale=both&trim.percentpadding=1&trim.threshold=80&width=1168",
