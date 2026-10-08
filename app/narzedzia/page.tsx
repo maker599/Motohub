@@ -2,7 +2,8 @@ import Link from "next/link";
 import SiteNav from "../SiteNav";
 
 const modules = [
-  { href: "/narzedzia/tuning-2t", tag: "ANALIZA", title: "Tuning 2T", desc: "Analizator parametrów silnika 2T z szacowaniem charakterystyki mocy." },
+  { href: "/narzedzia/tuning-2t", tag: "SYMULATOR", title: "Moc i obroty 2T", desc: "Orientacyjna krzywa mocy i momentu dla wybranych parametrów silnika." },
+  { href: "/narzedzia/setupy-2t", tag: "BAZA", title: "Baza setupów 2T", desc: "Przeszukiwalne konfiguracje startowe i listy kontrolne dla popularnych pojemności." },
   { href: "/narzedzia/kalkulator", tag: "KALKULATOR", title: "Kalkulator wydechu", desc: "Projektowy kalkulator geometrii komory rezonansowej i rozwinięć sekcji." },
 ];
 
