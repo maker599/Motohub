@@ -39,6 +39,7 @@ export async function POST(request: Request) {
     }
 
     const result = NextResponse.json({ ok: true });
+
     result.cookies.set("motohub_access_token", data.access_token, {
       httpOnly: true,
       sameSite: "lax",
@@ -47,7 +48,17 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 30,
     });
 
-    if (data.refresh_token) {\n      result.cookies.set("motohub_refresh_token", data.refresh_token, {\n        httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 30,\n      });\n    }\n    return result;
+    if (data.refresh_token) {
+      result.cookies.set("motohub_refresh_token", data.refresh_token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+
+    return result;
   } catch {
     return NextResponse.json(
       { error: "Nie udało się połączyć z Supabase. Sprawdź konfigurację Vercel." },
