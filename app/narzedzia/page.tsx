@@ -1,0 +1,56 @@
+'use client';
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import SiteNav from "../SiteNav";
+
+type Inputs = {
+  bore:number; stroke:number; cylinders:number; rpm:number; exhaustOpen:number; exhaustClose:number;
+  exhaustPortDiameter:number; egt:number; diffuser1:number; diffuser2:number; diffuser3:number;
+  baffleAngle:number; stingerRatio:number;
+};
+const defaults:Inputs={bore:54,stroke:54,cylinders:1,rpm:9000,exhaustOpen:190,exhaustClose:550,exhaustPortDiameter:28,egt:650,diffuser1:5,diffuser2:7,diffuser3:9,baffleAngle:11,stingerRatio:.60};
+const round=(v:number,d=1)=>Number(v.toFixed(d));
+const rad=(v:number)=>v*Math.PI/180;
+const cone=(a:number,b:number,angle:number)=>Math.abs(b-a)/2/Math.tan(rad(angle));
+const label=(a:string,u:string)=><span className="mb-2 flex items-center justify-between text-xs font-medium text-zinc-400"><span>{a}</span><span className="text-zinc-600">{u}</span></span>;
+
+export default function ToolsPage(){
+ const [i,setI]=useState(defaults);
+ const set=(k:keyof Inputs,v:string)=>setI(x=>({...x,[k]:Number(v)||0}));
+ const r=useMemo(()=>{
+  const wave=Math.sqrt(1.35*287*(i.egt+273.15));
+  const tuned=wave*i.exhaustOpen/(12*i.rpm)*1000;
+  const d1=Math.max(1,i.exhaustPortDiameter),d2=d1*Math.sqrt(1.55),d3=d1*Math.sqrt(3.35),dmax=d1*2.5;
+  const l1=cone(d1,d2,i.diffuser1),l2=cone(d2,d3,i.diffuser2),l3=cone(d3,dmax,i.diffuser3);
+  const belly=Math.max(10,tuned*.10),stinger=dmax*i.stingerRatio, baffle=cone(dmax,stinger,i.baffleAngle);
+  const stingerLength=stinger*12, header=Math.max(20,tuned-l1-l2-l3-belly-baffle);
+  return {wave,tuned,d1,d2,d3,dmax,l1,l2,l3,belly,baffle,stinger,stingerLength,header,disp:Math.PI/4*i.bore*i.bore*i.stroke*i.cylinders/1000,ratio:(dmax/d1)**2};
+ },[i]);
+ const seg=[["Rura wlotowa",r.header,r.d1,r.d1],["Dyfuzor 1",r.l1,r.d1,r.d2],["Dyfuzor 2",r.l2,r.d2,r.d3],["Dyfuzor 3",r.l3,r.d3,r.dmax],["Belly",r.belly,r.dmax,r.dmax],["Przeciwstożek",r.baffle,r.dmax,r.stinger],["Stinger",r.stingerLength,r.stinger,r.stinger]];
+ return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
+  <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
+   <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.3em] text-red-500">MotoHub / Narzędzia</p><h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">2T Exhaust Lab</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">Zaawansowany kalkulator geometrii komory rezonansowej 2T. Długość strojoną liczy z czasu otwarcia portu, temperatury gazów i obrotów docelowych, a następnie rozkłada ją na sekcje stożkowe.</p></div><div className="rounded-2xl border border-amber-500/20 bg-amber-500/[.06] px-4 py-3 text-xs leading-5 text-amber-200"><b>Projekt wstępny</b><br/>Nie zastępuje pomiarów i testów na hamowni.</div></div>
+  </div>
+  <div className="mt-8 grid gap-5 xl:grid-cols-[360px_1fr]">
+   <section className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><div className="flex items-center justify-between"><div><h2 className="font-bold">Parametry silnika</h2><p className="mt-1 text-xs text-zinc-500">Najlepiej wpisywać wartości zmierzone.</p></div><button onClick={()=>setI(defaults)} className="text-xs text-zinc-500 hover:text-white">Reset</button></div>
+    <div className="mt-5 space-y-4">
+     <label>{label("Średnica cylindra","mm")}<input type="number" value={i.bore} onChange={e=>set("bore",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <label>{label("Skok tłoka","mm")}<input type="number" value={i.stroke} onChange={e=>set("stroke",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <label>{label("Liczba cylindrów","szt.")}<input type="number" value={i.cylinders} onChange={e=>set("cylinders",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <label>{label("Obroty szczytu mocy","rpm")}<input type="number" value={i.rpm} onChange={e=>set("rpm",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <div className="grid grid-cols-2 gap-3"><label>{label("Otwarcie wydechu","° CA")}<input type="number" value={i.exhaustOpen} onChange={e=>set("exhaustOpen",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none"/></label><label>{label("Zamknięcie","° CA")}<input type="number" value={i.exhaustClose} onChange={e=>set("exhaustClose",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none"/></label></div>
+     <label>{label("Średnica portu / króćca","mm")}<input type="number" value={i.exhaustPortDiameter} onChange={e=>set("exhaustPortDiameter",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none"/></label>
+     <label>{label("Temperatura spalin EGT","°C")}<input type="number" value={i.egt} onChange={e=>set("egt",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none"/></label>
+     <div className="border-t border-white/10 pt-4"><p className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">Geometria stożków</p><div className="grid grid-cols-3 gap-2"><label>{label("D1","°")}<input type="number" step=".1" value={i.diffuser1} onChange={e=>set("diffuser1",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label><label>{label("D2","°")}<input type="number" step=".1" value={i.diffuser2} onChange={e=>set("diffuser2",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label><label>{label("D3","°")}<input type="number" step=".1" value={i.diffuser3} onChange={e=>set("diffuser3",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label></div><div className="mt-3 grid grid-cols-2 gap-3"><label>{label("Kąt przeciwstożka","°")}<input type="number" step=".1" value={i.baffleAngle} onChange={e=>set("baffleAngle",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label><label>{label("Stinger / Dmax","×")}<input type="number" step=".01" value={i.stingerRatio} onChange={e=>set("stingerRatio",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label></div></div>
+    </div>
+   </section>
+   <section className="space-y-5"><div className="grid gap-3 sm:grid-cols-4">{[["Pojemność",round(r.disp,1)+" cm³"],["Prędkość fali",round(r.wave)+" m/s"],["Długość strojona",round(r.tuned,1)+" mm"],["Dmax / D1",round(r.ratio,2)+"×"]].map(x=><div key={x[0]} className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><p className="text-xs text-zinc-500">{x[0]}</p><p className="mt-1 text-xl font-black">{x[1]}</p></div>)}</div>
+    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.035]"><div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Graficzny podgląd</h2><p className="mt-1 text-xs text-zinc-500">Schemat proporcjonalny; wartości podane poniżej są wymiarami projektowymi.</p></div><div className="overflow-x-auto p-5"><svg viewBox="0 0 1100 300" className="min-w-[850px] w-full" aria-label="Schemat wydechu 2T"><line x1="35" y1="150" x2="1065" y2="150" stroke="rgba(255,255,255,.12)" strokeDasharray="5 7"/>{(()=>{let x=40;const scale=850/Math.max(r.tuned+r.stingerLength+80,1);const top=(d:number)=>150-d*1.9,bot=(d:number)=>150+d*1.9;return seg.map((s,idx)=>{const w=Math.max(28,s[1]*scale),x1=x,x2=x+w;x+=w;return <g key={String(s[0])}><polygon points={`${x1},${top(Number(s[2]))} ${x2},${top(Number(s[3]))} ${x2},${bot(Number(s[3]))} ${x1},${bot(Number(s[2]))}`} fill={idx%2?"rgba(239,68,68,.17)":"rgba(255,255,255,.06)"} stroke="rgba(255,255,255,.22)"/><text x={(x1+x2)/2} y="275" fill="rgba(255,255,255,.55)" fontSize="10" textAnchor="middle">{s[0]}</text></g>})})()}</svg></div></div>
+    <div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Wymiary do wykonania</h2><div className="mt-4 overflow-hidden rounded-2xl border border-white/10"><table className="w-full text-sm"><thead className="bg-white/[.04] text-xs text-zinc-500"><tr><th className="px-3 py-3 text-left">Sekcja</th><th className="px-3 py-3 text-right">Długość</th><th className="px-3 py-3 text-right">Ø pocz.</th><th className="px-3 py-3 text-right">Ø końc.</th></tr></thead><tbody>{seg.map(s=><tr key={String(s[0])} className="border-t border-white/10"><td className="px-3 py-3 font-medium">{s[0]}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[1]))} mm</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[2]))}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[3]))}</td></tr>)}</tbody></table></div></div>
+     <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Kontrola</h2><div className="mt-4 space-y-3 text-sm"><div className="flex justify-between"><span className="text-zinc-500">Długość strojenia</span><b>{round(r.tuned)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Rura wlotowa</span><b>{round(r.header)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Stinger</span><b>Ø {round(r.stinger)} × {round(r.stingerLength)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">EGT</span><b>{round(i.egt)}°C</b></div></div><div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/[.06] p-4 text-xs leading-5 text-zinc-300"><b className="text-white">Ważne:</b> to model akustyczny i proporcjonalny punktu startowego. Port timing, temperatura, kształt kanału, króciec, tłumik i straty przepływu zmieniają rzeczywisty wynik.</div></div></div>
+    <div className="rounded-3xl border border-white/10 bg-black/20 p-5"><h2 className="font-bold">Metoda</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Długość strojoną wyznaczamy z czasu pomiędzy otwarciem portu a powrotem fali odbitej od przeciwstożka. Prędkość fali liczona jest z przybliżenia a = √(γRT), więc temperatura jest częścią obliczenia. Geometria stożków korzysta z klasycznych proporcji komory i pozostaje parametryczna, aby można było stroić charakter silnika.</p><p className="mt-3 text-xs text-zinc-600">Metoda inspirowana pracami Gordona Jenningsa i Gordona Blaira; nie jest pełną symulacją 1D gas-dynamics.</p></div>
+   </section>
+  </div>
+ </div></main>;
+}
