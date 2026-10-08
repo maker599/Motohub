@@ -51,7 +51,9 @@ export default function ToolsPage(){
   const total=Math.max(r.total,1);
   const n=180;
   const theta=rad(Math.min(90,Math.max(0,bend)));
-  const radius=theta>.0001?total/theta:0;
+  // Keep the bend compact instead of a long banana-like arc.
+  const bendRadius=Math.max(total*.45, total/Math.max(theta, .0001));
+  const radius=theta>.0001?bendRadius:0;
   const pts:{x:number;y:number;w:number;s:number}[]=[];
   const widthAt=(s:number)=>{
    let acc=0;
@@ -127,9 +129,9 @@ export default function ToolsPage(){
     <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.035]">
       <div className="border-b border-white/10 px-5 py-4"><div className="flex items-center justify-between"><div><h2 className="font-bold">Geometria montażowa</h2><p className="mt-1 text-xs text-zinc-500">Suwak wygina oś całej komory od 0° do 90°; profil średnicy pozostaje bez zmian.</p></div><span className="font-mono text-xs text-zinc-400">{bend}°</span></div><input aria-label="Stopień wygięcia wydechu" type="range" min="0" max="90" value={Math.min(90,bend)} onChange={e=>setBend(Number(e.target.value))} className="mt-4 w-full accent-red-500"/></div>
       <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy z rzeczywistym przebiegiem osi. Komora rozszerza się do belly, a następnie zwęża w kierunku przeciwstożka i stinger.</p></div>
-      <div className="overflow-hidden p-3 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
-       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
-        <svg viewBox={profile.viewBox} className="h-auto min-h-[420px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
+      <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
+       <div className="relative min-h-[620px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
+        <svg viewBox={profile.viewBox} className="h-auto min-h-[620px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
          <defs>
           <linearGradient id="pipeMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d7d9dc"/><stop offset=".22" stopColor="#6f7278"/><stop offset=".5" stopColor="#222428"/><stop offset=".78" stopColor="#85888e"/><stop offset="1" stopColor="#17181b"/></linearGradient>
           <linearGradient id="bellyHot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9b2920"/><stop offset=".45" stopColor="#e55335"/><stop offset="1" stopColor="#4c0e0c"/></linearGradient>
