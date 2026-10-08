@@ -73,7 +73,7 @@ export default function ToolsPage(){
    for(const [,len,a,b] of seg){
     if(s<=acc+len){
      const t=(s-acc)/Math.max(len,1);
-     return (a+(b-a)*t)*.88;
+     return (a+(b-a)*t)/2;
     }
     acc+=len;
    }
@@ -83,8 +83,9 @@ export default function ToolsPage(){
   // Realistic packaging: one exhaust elbow, plus a separate "push-out" control.
   // The second control bends the whole route outward smoothly instead of creating a second elbow.
   const elbowAngle=rad(Math.min(180,Math.max(0,bend)));
-  const elbowLen=Math.min(total*.12,Math.max(45,total*.08));
-  const elbowRadius=Math.max(35,elbowLen/Math.max(elbowAngle,.35));
+  const elbowLen=Math.min(total*.16,Math.max(70,total*.10));
+  const naturalRadius=Math.max(r.d1*3.0,elbowLen/Math.max(elbowAngle,.35));
+  const elbowRadius=elbowAngle>0.02?naturalRadius:Math.max(r.d1*3,elbowLen);
   const headerLen=Math.max(45,r.header*.45);
   const firstEnd=headerLen+elbowLen;
   const chamberStart=firstEnd;
@@ -240,7 +241,45 @@ export default function ToolsPage(){
                   );
                 })}
               </tbody></table></div>
-      {hoverPattern && (()=>{const p:any=patterns.find((x:any)=>x.name===hoverPattern); if(!p) return null; const w=Math.max(180,Math.min(430,(p.width??p.flatWidth??200)*1.25)); const h=Math.max(90,Math.min(260,(p.length??p.slant??100)*.72)); return <div className="pointer-events-none fixed bottom-6 right-6 z-50 w-[360px] rounded-2xl border border-white/15 bg-[#101010]/95 p-4 shadow-2xl backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-red-400">Podgląd rozwinięcia</p><p className="mt-1 text-sm font-bold">{p.name}</p></div><span className="text-[10px] text-zinc-500">do wycięcia</span></div><div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-3"><svg viewBox="0 0 520 280" className="h-44 w-full"><rect width="520" height="280" fill="#070707"/>{p.type==="prostokąt"?<><rect x="90" y="55" width="340" height="170" rx="2" fill="url(#patternMetal)" stroke="#d7d7d7" strokeWidth="2"/><line x1="90" y1="82" x2="430" y2="82" stroke="#777" strokeDasharray="6 5"/><text x="260" y="145" textAnchor="middle" fill="#aaa" fontSize="14">prostokąt</text></>:<path d={`M 260 28 L 440 238 L 80 238 Z`} fill="url(#patternMetal)" stroke="#d7d7d7" strokeWidth="2"/>}<defs><linearGradient id="patternMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#b9bcc0"/><stop offset=".5" stopColor="#3b3d40"/><stop offset="1" stopColor="#777a7e"/></linearGradient></defs><text x="260" y="263" textAnchor="middle" fill="#666" fontSize="10">kształt poglądowy • wymiar: {round(p.length ?? p.slant)} × {round(p.width ?? p.flatWidth)} mm</text></svg></div><div className="mt-3 grid grid-cols-2 gap-2 text-[10px]"><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">Długość</span><br/><b>{round(p.length ?? p.slant)} mm</b></div><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">Szerokość</span><br/><b>{round(p.width ?? p.flatWidth)} mm</b></div></div><p className="mt-2 text-[9px] leading-4 text-zinc-600">Podgląd pokazuje geometrię rozwinięcia. Dla stożka rzeczywisty kształt jest wycinkiem pierścienia; dokładne wymiary liczbowe są w tabeli.</p></div>})()}
+      {hoverPattern && (()=>{const p:any=patterns.find((x:any)=>x.name===hoverPattern); if(!p) return null;
+        const isCone=p.type==="wycinek stożka";
+        const L=Number(p.length??p.slant??0), W=Number(p.width??p.flatWidth??0);
+        const hit=seg.find((x)=>x[0]===p.name), d1=Number(hit?.[2]??0), d2=Number(hit?.[3]??0);
+        const sl=Number(p.slant??L), ro=Number(p.outer??0), ri=Number(p.inner??0), ang=Number(p.angle??0);
+        const fmt=(v:number)=>round(v,1);
+        const dim=(x1:number,y1:number,x2:number,y2:number,labelText:string)=><g><line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#f87171" strokeWidth="1.2"/><line x1={x1-4} y1={y1-4} x2={x1+4} y2={y1+4} stroke="#f87171"/><line x1={x2-4} y1={y2-4} x2={x2+4} y2={y2+4} stroke="#f87171"/><text x={(x1+x2)/2} y={(y1+y2)/2-7} textAnchor="middle" fill="#fca5a5" fontSize="11" fontFamily="monospace">{labelText}</text></g>;
+        const sectorPath=(()=>{const cx=260,cy=228,scale=Math.min(150/Math.max(ro,1),200/Math.max(ro,1));const rO=ro*scale,rI=ri*scale;const a0=-ang/2*Math.PI/180,a1=ang/2*Math.PI/180;const x0=cx+rO*Math.cos(a0),y0=cy+rO*Math.sin(a0),x1=cx+rO*Math.cos(a1),y1=cy+rO*Math.sin(a1),ix1=cx+rI*Math.cos(a1),iy1=cy+rI*Math.sin(a1),ix0=cx+rI*Math.cos(a0),iy0=cy+rI*Math.sin(a0);return `M ${x0} ${y0} A ${rO} ${rO} 0 ${ang>180?1:0} 1 ${x1} ${y1} L ${ix1} ${iy1} A ${rI} ${rI} 0 ${ang>180?1:0} 0 ${ix0} ${iy0} Z`;})();
+        return <div className="pointer-events-none fixed bottom-6 right-6 z-50 w-[470px] rounded-2xl border border-white/15 bg-[#101010]/95 p-4 shadow-2xl backdrop-blur-xl">
+          <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-red-400">Podgląd rozwinięcia 1:1</p><p className="mt-1 text-sm font-bold">{p.name}</p></div><span className="text-[10px] text-zinc-500">wymiary do wycięcia</span></div>
+          <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-2">
+            <svg viewBox="0 0 520 330" className="h-64 w-full">
+              <defs><linearGradient id="patternMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#b9bcc0"/><stop offset=".5" stopColor="#3b3d40"/><stop offset="1" stopColor="#777a7e"/></linearGradient></defs>
+              <rect width="520" height="330" fill="#070707"/>
+              {isCone ? <>
+                <path d={sectorPath} fill="url(#patternMetal)" stroke="#e5e7eb" strokeWidth="2"/>
+                <line x1="260" y1="228" x2="260" y2="78" stroke="#f87171" strokeDasharray="5 4"/>
+                <line x1="260" y1="228" x2="260" y2="110" stroke="#f87171" strokeDasharray="5 4"/>
+                <text x="268" y="96" fill="#fca5a5" fontSize="11" fontFamily="monospace">R2 {fmt(ro)} mm</text>
+                <text x="268" y="128" fill="#fca5a5" fontSize="11" fontFamily="monospace">R1 {fmt(ri)} mm</text>
+                <text x="260" y="315" textAnchor="middle" fill="#aaa" fontSize="11" fontFamily="monospace">wycinek pierścienia • α {fmt(ang)}° • tworząca {fmt(sl)} mm</text>
+                <text x="30" y="24" fill="#777" fontSize="10">ROZWINIĘCIE STOŻKA</text>
+                {dim(78,255,442,255,`szer. po łuku ${fmt(W)} mm`)}
+                <text x="35" y="295" fill="#777" fontSize="10">D1 {fmt(d1)} mm</text><text x="395" y="295" fill="#777" fontSize="10">D2 {fmt(d2)} mm</text>
+              </> : <>
+                <rect x="95" y="80" width="330" height="135" rx="2" fill="url(#patternMetal)" stroke="#e5e7eb" strokeWidth="2"/>
+                {dim(95,240,425,240,`długość ${fmt(L)} mm`)}
+                {dim(455,80,455,215,`szerokość ${fmt(W)} mm`)}
+                <text x="260" y="150" textAnchor="middle" fill="#aaa" fontSize="12" fontFamily="monospace">ROZW. PROSTOKĄTNE</text>
+                <text x="30" y="24" fill="#777" fontSize="10">BLANK DO WALCOWANIA</text>
+                <text x="35" y="295" fill="#777" fontSize="10">dł. osiowa = {fmt(L)} mm</text><text x="300" y="295" fill="#777" fontSize="10">obwód = {fmt(W)} mm</text>
+              </>}
+            </svg>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
+            {isCone ? <><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">D1 → D2</span><br/><b>{fmt(d1)} → {fmt(d2)} mm</b></div><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">Tworząca</span><br/><b>{fmt(sl)} mm</b></div><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">R wewn.</span><br/><b>{fmt(ri)} mm</b></div><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">R zewn. / α</span><br/><b>{fmt(ro)} mm / {fmt(ang)}°</b></div></> : <><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">Długość osiowa</span><br/><b>{fmt(L)} mm</b></div><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">Szerokość blanku</span><br/><b>{fmt(W)} mm</b></div></>}
+          </div>
+          <p className="mt-2 text-[9px] leading-4 text-zinc-600">{isCone?"To jest rzeczywisty rozwój stożka ściętego: wycinek pierścienia, nie trójkąt. Wymiary są liczone z D1, D2 i długości osiowej.":"Blank ma wymiar długość osiowa × obwód. Zakład spawalniczy i kerf można dodać jako osobną korektę."}</p>
+        </div>})()}
       <div className="mt-3 rounded-xl border border-amber-500/15 bg-amber-500/[.05] p-3 text-[11px] leading-5 text-amber-200/80">To są wymiary rozwinięć dla prostych odcinków: prostokątów i wycinków stożków. Zakład na spawanie, kerf lasera oraz korektę po walcowaniu dodaj osobno. Kolanko nie jest tu udawane jako prostokąt — dla blachy wymaga osobnego rozwinięcia segmentowanego albo gotowego kolanka.</div></div>
      <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Kontrola</h2><div className="mt-4 space-y-3 text-sm"><div className="flex justify-between"><span className="text-zinc-500">Długość strojenia</span><b>{round(r.tuned)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Rura wlotowa</span><b>{round(r.header)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Stinger</span><b>Ø {round(r.stinger)} × {round(r.stingerLength)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">EGT</span><b>{round(i.egt)}°C</b></div></div><div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/[.06] p-4 text-xs leading-5 text-zinc-300"><b className="text-white">Ważne:</b> to model akustyczny i proporcjonalny punktu startowego. Port timing, temperatura, kształt kanału, króciec, tłumik i straty przepływu zmieniają rzeczywisty wynik.</div></div></div>
     <div className="rounded-3xl border border-white/10 bg-black/20 p-5"><h2 className="font-bold">Model i założenia</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Długość akustyczna jest tu traktowana jako model orientacyjny. Rzeczywista długość strojenia zależy m.in. od temperatury wzdłuż wydechu, prędkości dźwięku, korekty efektywnej długości oraz geometrii portu. Rozwinięcia blach są geometrią wykonawczą dla przyjętych wymiarów, ale nie są certyfikowanym projektem silnika.</p><p className="mt-3 text-xs text-zinc-600">Model nie jest pełną symulacją 1D gas-dynamics: temperatura wzdłuż układu, straty, korekta efektywnej długości, tłumik i dokładny kształt portu wymagają dalszej walidacji.</p></div>
