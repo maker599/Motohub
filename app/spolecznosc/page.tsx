@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SiteNav from "../SiteNav";
 
 const posts=[["Michał","Yamaha MT-07","W końcu odebrałem swoją MT-07. Teraz czas na pierwsze dłuższe trasy!","2h"],["Kuba","BMW R 1300 GS","Macie jakieś polecane trasy na weekend? Chętnie zrobię 300–400 km.","5h"],["Ola","Honda CBR650R","Pierwszy sezon i coraz bardziej rozumiem, dlaczego wszyscy mówią, że jazda uzależnia.","1d"]];
 
