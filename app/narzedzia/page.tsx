@@ -157,9 +157,7 @@ export default function ToolsPage(){
   })();
   const viewWidth=(maxX-minX)*scale+pad*2;
   const viewHeight=(maxY-minY)*scale+pad*2;
-  const scaleBarMm=Math.max(100,r.total);
-  const scaleBarPx=scaleBarMm*scale;
-  return {outline,center,seams,flange,scale,viewWidth,viewHeight,scaleBarMm,scaleBarPx,viewBox:`0 0 ${viewWidth} ${viewHeight}`};
+  return {outline,center,seams,flange,scale,viewWidth,viewHeight,viewBox:`0 0 ${viewWidth} ${viewHeight}`};
  },[r,bend,bend2]);
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
@@ -223,14 +221,7 @@ export default function ToolsPage(){
          {profile.seams.map((s,n)=><line key={n} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke="#050505" strokeOpacity=".65" strokeWidth="2"/>)}
          <text x="42" y="34" fill="#777" fontSize="12" fontFamily="system-ui" letterSpacing="2">2T EXPANSION CHAMBER</text>
          <text x="42" y="52" fill="#555" fontSize="10" fontFamily="system-ui">Ø rośnie do belly, następnie maleje do przeciwstożka / stinger</text>
-         <g transform={`translate(48 ${profile.viewHeight-34})`}>
-          <line x1="0" y1="0" x2={profile.scaleBarPx} y2="0" stroke="#d4d4d8" strokeWidth="2"/>
-          <line x1="0" y1="-6" x2="0" y2="6" stroke="#d4d4d8" strokeWidth="2"/>
-          <line x1={profile.scaleBarPx} y1="-6" x2={profile.scaleBarPx} y2="6" stroke="#d4d4d8" strokeWidth="2"/>
-          <text x={profile.scaleBarPx/2} y="-10" textAnchor="middle" fill="#a1a1aa" fontSize="10" fontFamily="monospace">{round(profile.scaleBarMm/10)} cm</text>
-          <text x={profile.scaleBarPx+10} y="4" fill="#52525b" fontSize="9" fontFamily="system-ui">skala = cała długość wydechu</text>
-         </g>
-        </svg>
+         </svg>
         <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
          <p className="mt-1 text-xs text-zinc-300">Kolanko: {Math.min(180,180-bend)}° · Wypchnięcie: {Math.min(100,bend2)}% · LPM: {Math.round(r.total)} mm</p>
