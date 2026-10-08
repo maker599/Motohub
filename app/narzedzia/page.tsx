@@ -83,7 +83,7 @@ export default function ToolsPage(){
 
   // Realistic packaging: one exhaust elbow, plus a separate "push-out" control.
   // The second control bends the whole route outward smoothly instead of creating a second elbow.
-  const elbowAngle=rad(Math.min(180,Math.max(0,bend)));
+  const elbowAngle=rad(Math.min(180,Math.max(0,180-bend)));
   const elbowLen=Math.min(total*.12,Math.max(45,total*.08));
   const elbowRadius=Math.max(35,elbowLen/Math.max(elbowAngle,.35));
   const headerLen=Math.max(30,r.header*.22);
@@ -157,7 +157,7 @@ export default function ToolsPage(){
   })();
   const viewWidth=(maxX-minX)*scale+pad*2;
   const viewHeight=(maxY-minY)*scale+pad*2;
-  const scaleBarMm=200;
+  const scaleBarMm=Math.max(100,r.total);
   const scaleBarPx=scaleBarMm*scale;
   return {outline,center,seams,flange,scale,viewWidth,viewHeight,scaleBarMm,scaleBarPx,viewBox:`0 0 ${viewWidth} ${viewHeight}`};
  },[r,bend,bend2]);
@@ -206,8 +206,8 @@ export default function ToolsPage(){
       </div>
       <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy typowej komory 2T: flansza przy cylindrze, krótki header, płynne kolanko, dyfuzory, belly, przeciwstożek i stinger. Wypchnięcie wpływa na cały przebieg osiowy, nie tylko na jeden fragment.</p></div>
       <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
-       <div className="relative min-h-[500px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
-        <svg viewBox={profile.viewBox} className="h-auto max-h-[500px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
+       <div className="relative min-h-[380px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
+        <svg viewBox={profile.viewBox} preserveAspectRatio="xMidYMid meet" className="h-auto max-h-[390px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
          <defs>
           <linearGradient id="pipeMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d7d9dc"/><stop offset=".22" stopColor="#6f7278"/><stop offset=".5" stopColor="#222428"/><stop offset=".78" stopColor="#85888e"/><stop offset="1" stopColor="#17181b"/></linearGradient>
           <linearGradient id="bellyHot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9b2920"/><stop offset=".45" stopColor="#e55335"/><stop offset="1" stopColor="#4c0e0c"/></linearGradient>
@@ -227,13 +227,13 @@ export default function ToolsPage(){
           <line x1="0" y1="0" x2={profile.scaleBarPx} y2="0" stroke="#d4d4d8" strokeWidth="2"/>
           <line x1="0" y1="-6" x2="0" y2="6" stroke="#d4d4d8" strokeWidth="2"/>
           <line x1={profile.scaleBarPx} y1="-6" x2={profile.scaleBarPx} y2="6" stroke="#d4d4d8" strokeWidth="2"/>
-          <text x={profile.scaleBarPx/2} y="-10" textAnchor="middle" fill="#a1a1aa" fontSize="10" fontFamily="monospace">20 cm</text>
-          <text x={profile.scaleBarPx+10} y="4" fill="#52525b" fontSize="9" fontFamily="system-ui">skala orientacyjna</text>
+          <text x={profile.scaleBarPx/2} y="-10" textAnchor="middle" fill="#a1a1aa" fontSize="10" fontFamily="monospace">{round(scaleBarMm/10)} cm</text>
+          <text x={profile.scaleBarPx+10} y="4" fill="#52525b" fontSize="9" fontFamily="system-ui">skala = cała długość wydechu</text>
          </g>
         </svg>
         <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
-         <p className="mt-1 text-xs text-zinc-300">Kolanko: {Math.min(180,bend)}° · Wypchnięcie: {Math.min(100,bend2)}% · LPM: {Math.round(r.total)} mm</p>
+         <p className="mt-1 text-xs text-zinc-300">Kolanko: {Math.min(180,180-bend)}° · Wypchnięcie: {Math.min(100,bend2)}% · LPM: {Math.round(r.total)} mm</p>
         </div>
        </div>
       </div>    </div><div className="grid gap-5 lg:grid-cols-2"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Rozwinięcia blach do wycięcia</h2><p className="mt-1 text-xs text-zinc-500">Dla prostych sekcji pokazuję rzeczywiste wymiary rozwinięcia przed walcowaniem i stożkowaniem, a nie samą długość osiową.</p><div className="mt-4 overflow-x-auto rounded-2xl border border-white/10"><table className="w-full min-w-[760px] text-sm"><thead className="bg-white/[.04] text-[11px] text-zinc-500"><tr><th className="px-3 py-3 text-left">Detal</th><th className="px-3 py-3 text-left">Typ rozwinięcia</th><th className="px-3 py-3 text-right">Dł. osiowa</th><th className="px-3 py-3 text-right">Szer. blachy</th><th className="px-3 py-3 text-right">D1</th><th className="px-3 py-3 text-right">D2</th><th className="px-3 py-3 text-right">Skos / kąt</th></tr></thead><tbody>
