@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import SiteNav from "../SiteNav";
@@ -44,10 +45,23 @@ const bikes = [
   { id:"bmw-s1000rr", brand:"BMW", model:"S 1000 RR", year:2025, engine:"999 cm³", type:"Sport", power:"210 KM" },
   { id:"triumph-streettriple", brand:"Triumph", model:"Street Triple 765", year:2025, engine:"765 cm³", type:"Naked", power:"120 KM" },
   { id:"triumph-tiger900", brand:"Triumph", model:"Tiger 900", year:2025, engine:"888 cm³", type:"Adventure", power:"108 KM" },
+  { id:"yamaha-r3", brand:"Yamaha", model:"R3", year:2025, engine:"321 cm³", type:"Sport", power:"42 KM" },
+  { id:"yamaha-r1", brand:"Yamaha", model:"R1", year:2025, engine:"998 cm³", type:"Sport", power:"200 KM" },
+  { id:"honda-cb500-hornet", brand:"Honda", model:"CB500 Hornet", year:2025, engine:"471 cm³", type:"Naked", power:"48 KM" },
+  { id:"honda-crf300l", brand:"Honda", model:"CRF300L", year:2025, engine:"286 cm³", type:"Enduro", power:"27 KM" },
+  { id:"suzuki-gsx-s1000", brand:"Suzuki", model:"GSX-S1000", year:2025, engine:"999 cm³", type:"Naked", power:"152 KM" },
+  { id:"suzuki-hayabusa", brand:"Suzuki", model:"Hayabusa", year:2025, engine:"1 340 cm³", type:"Sport", power:"190 KM" },
+  { id:"kawasaki-ninja500", brand:"Kawasaki", model:"Ninja 500", year:2025, engine:"451 cm³", type:"Sport", power:"45 KM" },
+  { id:"kawasaki-versys650", brand:"Kawasaki", model:"Versys 650", year:2025, engine:"649 cm³", type:"Adventure", power:"67 KM" },
+  { id:"ktm-690-enduro-r", brand:"KTM", model:"690 Enduro R", year:2025, engine:"693 cm³", type:"Enduro", power:"79 KM" },
+  { id:"aprilia-tuono660", brand:"Aprilia", model:"Tuono 660", year:2025, engine:"659 cm³", type:"Naked", power:"95 KM" },
+  { id:"ducati-multistrada-v2", brand:"Ducati", model:"Multistrada V2", year:2025, engine:"890 cm³", type:"Adventure", power:"115 KM" },
+  { id:"bmw-f900gs", brand:"BMW", model:"F 900 GS", year:2025, engine:"895 cm³", type:"Adventure", power:"105 KM" },
+  { id:"triumph-daytona660", brand:"Triumph", model:"Daytona 660", year:2025, engine:"660 cm³", type:"Sport", power:"95 KM" },
 ];
 
-const types = ["Naked", "Sport", "Adventure", "Touring"];
-const brands = ["Yamaha", "Honda", "BMW", "Kawasaki", "Ducati", "KTM"];
+const types = ["Naked", "Sport", "Adventure", "Touring", "Enduro", "MX", "Cruiser"];
+const brands = ["Yamaha", "Honda", "Suzuki", "BMW", "Kawasaki", "Ducati", "KTM", "Husqvarna", "GasGas", "Beta", "TM Racing", "Aprilia", "Triumph"];
 
 export default function MotorcyclesPage() {
   const [query, setQuery] = useState("");
@@ -123,7 +137,7 @@ export default function MotorcyclesPage() {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {filtered.map((bike) => (
                 <Link key={bike.id} href={"/motocykle/"+bike.id} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.03] transition hover:-translate-y-1 hover:border-red-500/30">
-                  <div className="flex aspect-[16/10] items-end bg-gradient-to-br from-zinc-700 via-zinc-900 to-black p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div>
+                  <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900"><Image src={`/motorcycles/${bike.id}.jpg`} alt={`${bike.brand} ${bike.model}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" /><div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div></div>
                   <div className="p-5"><p className="text-xs font-bold uppercase tracking-wider text-red-400">{bike.brand}</p><h2 className="mt-1 text-xl font-bold">{bike.model}</h2><div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500"><span>{bike.engine}</span><span>{bike.power}</span><span>{bike.year}</span><span>Sprawdź →</span></div></div>
                 </Link>
               ))}
