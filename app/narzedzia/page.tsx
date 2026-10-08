@@ -49,11 +49,7 @@ export default function ToolsPage(){
  ];
  const profile=useMemo(()=>{
   const total=Math.max(r.total,1);
-  const n=180;
-  const theta=rad(Math.min(90,Math.max(0,bend)));
-  // Keep the bend compact instead of a long banana-like arc.
-  const bendRadius=Math.max(total*.45, total/Math.max(theta, .0001));
-  const radius=theta>.0001?bendRadius:0;
+  const n=220;
   const pts:{x:number;y:number;w:number;s:number}[]=[];
   const widthAt=(s:number)=>{
    let acc=0;
@@ -66,21 +62,33 @@ export default function ToolsPage(){
    }
    return r.stinger*.88;
   };
+
+  // Realistic 2T layout: the cylinder-side header wraps down and back in a
+  // compact U before the expansion chamber continues away from the cylinder.
+  const uLen=Math.min(total*.30,Math.max(110,total*.24));
+  const uRadius=Math.max(45,uLen/2);
+  const bodyStart=uLen;
+  const bodyLen=Math.max(1,total-bodyStart);
   for(let k=0;k<=n;k++){
    const s=total*k/n;
    let x:number,y:number;
-   if(theta<.0001){ x=s; y=0; }
-   else {
-    const a=theta*k/n;
-    x=radius*Math.sin(a);
-    y=radius*(1-Math.cos(a));
+   if(s<=uLen){
+    const t=s/uLen;
+    const a=Math.PI*t;
+    x=uRadius*(1-Math.cos(a));
+    y=-uRadius*Math.sin(a);
+   }else{
+    const q=(s-bodyStart)/bodyLen;
+    x=2*uRadius + bodyLen*q;
+    y=0;
    }
    pts.push({x,y,w:widthAt(s),s});
   }
+
   const minX=Math.min(...pts.map(p=>p.x-p.w)),maxX=Math.max(...pts.map(p=>p.x+p.w));
   const minY=Math.min(...pts.map(p=>p.y-p.w)),maxY=Math.max(...pts.map(p=>p.y+p.w));
-  const pad=70;
-  const scale=Math.min(1140/Math.max(maxX-minX,1),500/Math.max(maxY-minY,1));
+  const pad=80;
+  const scale=Math.min(1180/Math.max(maxX-minX,1),560/Math.max(maxY-minY,1));
   const tx=(x:number)=>pad+(x-minX)*scale;
   const ty=(y:number)=>pad+(maxY-y)*scale;
   const outlineTop:string[]=[];
@@ -102,7 +110,7 @@ export default function ToolsPage(){
    const dx=next.x-prev.x,dy=next.y-prev.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
    return {x1:tx(p.x+nx*p.w),y1:ty(p.y+ny*p.w),x2:tx(p.x-nx*p.w),y2:ty(p.y-ny*p.w)};
   });
-  return {outline,center,seams,widths:pts.filter((_,k)=>k%18===0).map(p=>({x:tx(p.x),y:ty(p.y),w:p.w*scale})),viewBox:`0 0 ${Math.max(1240,(maxX-minX)*scale+pad*2)} ${Math.max(600,(maxY-minY)*scale+pad*2)}`};
+  return {outline,center,seams,viewBox:`0 0 ${Math.max(1320,(maxX-minX)*scale+pad*2)} ${Math.max(700,(maxY-minY)*scale+pad*2)}`};
  },[r,bend]);
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
@@ -127,8 +135,8 @@ export default function ToolsPage(){
    </section>
    <section className="space-y-5"><div className="grid gap-3 sm:grid-cols-4">{[["Pojemność",round(r.disp,1)+" cm³"],["Prędkość fali",round(r.wave)+" m/s"],["Długość strojona",round(r.tuned,1)+" mm"],["Dmax / D1",round(r.ratio,2)+"×"]].map(x=><div key={x[0]} className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><p className="text-xs text-zinc-500">{x[0]}</p><p className="mt-1 text-xl font-black">{x[1]}</p></div>)}</div>
     <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.035]">
-      <div className="border-b border-white/10 px-5 py-4"><div className="flex items-center justify-between"><div><h2 className="font-bold">Geometria montażowa</h2><p className="mt-1 text-xs text-zinc-500">Suwak wygina oś całej komory od 0° do 90°; profil średnicy pozostaje bez zmian.</p></div><span className="font-mono text-xs text-zinc-400">{bend}°</span></div><input aria-label="Stopień wygięcia wydechu" type="range" min="0" max="90" value={Math.min(90,bend)} onChange={e=>setBend(Number(e.target.value))} className="mt-4 w-full accent-red-500"/></div>
-      <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy z rzeczywistym przebiegiem osi. Komora rozszerza się do belly, a następnie zwęża w kierunku przeciwstożka i stinger.</p></div>
+      <div className="border-b border-white/10 px-5 py-4"><div className="flex items-center justify-between"><div><h2 className="font-bold">Geometria montażowa</h2><p className="mt-1 text-xs text-zinc-500">Suwak reguluje ciasność układu; część przy cylindrze zawija się w kompaktowe U, a belly wychodzi z powrotem wzdłuż osi.</p></div><span className="font-mono text-xs text-zinc-400">{bend}°</span></div><input aria-label="Stopień wygięcia wydechu" type="range" min="0" max="90" value={Math.min(90,bend)} onChange={e=>setBend(Number(e.target.value))} className="mt-4 w-full accent-red-500"/></div>
+      <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy inspirowany typowymi komorami 2T: header przy cylindrze zawija się w U, potem profil przechodzi przez belly i wraca do przeciwstożka oraz stinger.</p></div>
       <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
        <div className="relative min-h-[620px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
         <svg viewBox={profile.viewBox} className="h-auto min-h-[620px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
@@ -147,7 +155,7 @@ export default function ToolsPage(){
         </svg>
         <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
-         <p className="mt-1 text-xs text-zinc-300">Bend: {Math.min(90,bend)}° · LPM: {Math.round(r.total)} mm</p>
+         <p className="mt-1 text-xs text-zinc-300">U-bend: {Math.min(90,bend)}° · LPM: {Math.round(r.total)} mm</p>
         </div>
        </div>
       </div>    </div><div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Wymiary do wykonania</h2><p className="mt-1 text-xs text-zinc-500">Cięciwa zmienia się wraz z wygięciem — przy 0° jest równa długości osi, a przy 90° pokazuje wymiar wynikający z łuku sekcji.</p><div className="mt-4 overflow-hidden rounded-2xl border border-white/10"><table className="w-full text-sm"><thead className="bg-white/[.04] text-xs text-zinc-500"><tr><th className="px-3 py-3 text-left">Sekcja</th><th className="px-3 py-3 text-right">Łuk osi</th><th className="px-3 py-3 text-right">Cięciwa</th><th className="px-3 py-3 text-right">Ø pocz.</th><th className="px-3 py-3 text-right">Ø końc.</th></tr></thead><tbody>{seg.map(s=>{const bendRad=rad(Math.min(90,Math.max(0,bend))); const theta=bendRad*Number(s[1])/Math.max(r.total,1); const chord=theta<.0001?Number(s[1]):2*(r.total/Math.max(bendRad,.0001))*Math.sin(theta/2);return <tr key={String(s[0])} className="border-t border-white/10"><td className="px-3 py-3 font-medium">{s[0]}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[1]))} mm</td><td className="px-3 py-3 text-right font-mono">{round(chord)} mm</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[2]))}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[3]))}</td></tr>})}</tbody></table></div></div>
