@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { cookies } from "next/headers";
 
 const features = [
   { title: "Znajdź motocykl", text: "Przeglądaj motocykle i odkrywaj modele dopasowane do Twoich zainteresowań.", href: "/motocykle" },
@@ -9,19 +7,9 @@ const features = [
   { title: "Społeczność", text: "Dziel się zajawką, poznawaj innych motocyklistów i rozmawiaj o motocyklach.", href: "/spolecznosc" },
 ];
 
-export default function Home() {
-  const [user, setUser] = useState<{ email?: string; username?: string } | null>(null);
-  const [loadingUser, setLoadingUser] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => setUser(data?.user ?? null))
-      .catch(() => setUser(null))
-      .finally(() => setLoadingUser(false));
-  }, []);
-
-  const profileName = user?.username || user?.email?.split("@")[0] || "Profil";
+export default async function Home() {
+  const cookieStore = await cookies();
+  const loggedIn = Boolean(cookieStore.get("motohub_access_token")?.value || cookieStore.get("motohub_refresh_token")?.value);
 
   return (
     <main className="min-h-screen bg-[#090909] text-white">
@@ -38,14 +26,9 @@ export default function Home() {
             </div>
 
             <div className="flex min-w-[150px] items-center justify-end gap-3">
-              {loadingUser ? (
-                <div className="h-9 w-24 animate-pulse rounded-full bg-white/10" />
-              ) : user ? (
-                <Link
-                  href="/profil"
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white transition hover:border-red-500/30 hover:bg-white/10"
-                >
-                  {profileName}
+              {loggedIn ? (
+                <Link href="/profil" className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-bold text-white transition hover:border-red-500/30 hover:bg-white/10">
+                  Mój profil
                 </Link>
               ) : (
                 <>
@@ -63,7 +46,7 @@ export default function Home() {
               <p className="mt-8 max-w-xl text-lg leading-8 text-zinc-400">Odkrywaj motocykle, buduj swój garaż i poznawaj ludzi, którzy mają tę samą zajawkę. Wszystko w jednym miejscu.</p>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                 <Link href="/motocykle" className="rounded-full bg-red-500 px-7 py-4 text-center font-bold text-white transition hover:bg-red-400">Odkryj motocykle</Link>
-                <Link href={user ? "/garaz" : "/rejestracja"} className="rounded-full border border-white/15 bg-white/5 px-7 py-4 text-center font-bold text-white transition hover:bg-white/10">{user ? "Przejdź do garażu" : "Stwórz konto"}</Link>
+                <Link href={loggedIn ? "/garaz" : "/rejestracja"} className="rounded-full border border-white/15 bg-white/5 px-7 py-4 text-center font-bold text-white transition hover:bg-white/10">{loggedIn ? "Przejdź do garażu" : "Stwórz konto"}</Link>
               </div>
             </div>
 
@@ -95,7 +78,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
         <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900 to-[#101010] p-8 sm:p-12 lg:p-16">
-          <div className="max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.25em] text-red-500">Gotowy?</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Wskakuj do MotoHub.</h2><p className="mt-5 leading-7 text-zinc-400">Załóż konto i zacznij budować swoje miejsce w świecie motocykli.</p><Link href={user ? "/garaz" : "/rejestracja"} className="mt-8 inline-block rounded-full bg-white px-7 py-4 font-bold text-black transition hover:bg-zinc-200">{user ? "Otwórz garaż" : "Zacznij teraz"}</Link></div>
+          <div className="max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.25em] text-red-500">Gotowy?</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Wskakuj do MotoHub.</h2><p className="mt-5 leading-7 text-zinc-400">Załóż konto i zacznij budować swoje miejsce w świecie motocykli.</p><Link href={loggedIn ? "/garaz" : "/rejestracja"} className="mt-8 inline-block rounded-full bg-white px-7 py-4 font-bold text-black transition hover:bg-zinc-200">{loggedIn ? "Otwórz garaż" : "Zacznij teraz"}</Link></div>
         </div>
       </section>
 
