@@ -158,6 +158,54 @@ const setups: Setup[] = [
     caveat: "Stage6 Sport Pro to nazwa serii spotykana w różnych aplikacjach; nie zakładaj, że każdy wariant pasuje do każdego Minarelli."
   },
   {
+    id: "am6-mhr", name: "AM6 / Malossi MHR — karta high-end", level: "wyścig", platform: "AM6", displacement: "według konkretnego zestawu",
+    use: "Projekt torowy", character: "Karta do badania kompatybilności w rodzinie Malossi MHR — nie zakłada jednego uniwersalnego cylindra.",
+    parts: [
+      { group: "Cylinder", examples: "Malossi MHR / MHR Team tylko w wariancie katalogowanym dla dokładnej platformy", purpose: "Sprawdź numer produktu, pojemność, chłodzenie i zalecany dół silnika." },
+      { group: "Wał i łożyska", examples: "Zgodny komplet wału, korbowodu i łożysk wskazany przez producenta lub warsztat", purpose: "Weryfikacja limitów pracy i geometrii montażu." },
+      { group: "Wydech", examples: "Komora high-end z potwierdzoną aplikacją dla wybranego cylindra", purpose: "Nie dobieraj wydechu na podstawie samego logo lub pojemności." },
+      { group: "Pozostały osprzęt", examples: "Zapłon, gaźnik, membrana i sprzęgło według specyfikacji zestawu", purpose: "Całość wymaga strojenia i profesjonalnej walidacji." }
+    ],
+    checks: ["Zweryfikuj dokładną serię MHR", "Potwierdź kompatybilność z AM6", "Zleć kontrolę montażu i szczelności", "Udokumentuj pomiary i konfigurację"],
+    caveat: "MHR obejmuje różne produkty. Ta karta nie przypisuje konkretnej pojemności ani osiągów bez numeru katalogowego."
+  },
+  {
+    id: "derbi-air-sport", name: "Derbi D50B0 / Airsal — sport do high-end", level: "sport", platform: "Derbi D50B0", displacement: "według wybranego Airsal kit",
+    use: "Ulica / projekt sportowy po weryfikacji", character: "Przykładowa ścieżka od zestawu sportowego do pełnej konfiguracji zgodnej z dokumentacją.",
+    parts: [
+      { group: "Cylinder", examples: "Airsal Sport / Racing tylko z katalogowym dopasowaniem do D50B0", purpose: "Sprawdź rzeczywistą pojemność, głowicę i średnicę sworznia." },
+      { group: "Wał", examples: "OEM w granicach specyfikacji lub zestaw rekomendowany do wybranego cylindra", purpose: "Stan i dopuszczalne obciążenie muszą być potwierdzone." },
+      { group: "Wydech", examples: "Sportowy lub racing model dla konkretnego cylindra i ramy", purpose: "Charakterystyka wydechu powinna odpowiadać dokumentacji." },
+      { group: "Dolot i sprzęgło", examples: "Komponenty w zalecanym zakresie producenta zestawu", purpose: "Nie kopiuj ustawień gaźnika ani sprzęgła z innego silnika." }
+    ],
+    checks: ["Potwierdź kod D50B0", "Sprawdź dokładną wersję zestawu Airsal", "Skontroluj wał i szczelność skrzyni", "Zweryfikuj legalność konfiguracji drogowej"],
+    caveat: "Airsal ma wiele serii i pojemności; nazwa producenta nie gwarantuje dopasowania."
+  },
+  {
+    id: "piaggio-mhr", name: "Piaggio Hi-Per2 / Malossi MHR — skuter high-end", level: "wyścig", platform: "Piaggio Hi-Per2", displacement: "według konkretnego kitu",
+    use: "Skuter torowy", character: "Silnik i przekładnia CVT powinny być projektowane jako jeden układ.",
+    parts: [
+      { group: "Cylinder", examples: "Malossi MHR / MHR Team wyłącznie dla właściwego wariantu Piaggio i chłodzenia", purpose: "Sprawdź numer katalogowy, kartery i elementy dołączone do zestawu." },
+      { group: "Wał i dół", examples: "Wał, łożyska i uszczelniacze wskazane do danego cylindra", purpose: "Weryfikacja geometrii i zakresu obciążeń." },
+      { group: "Wydech i dolot", examples: "Komora i dolot dobrane do konkretnej serii cylindra", purpose: "Kompatybilność całego układu jest ważniejsza niż marka." },
+      { group: "CVT", examples: "Warianty wariatora, paska i sprzęgła zgodne z konkretnym skuterem", purpose: "Dobór potwierdza się dokumentacją i kontrolowanymi testami." }
+    ],
+    checks: ["Ustal wersję chłodzenia", "Zweryfikuj numery katalogowe", "Sprawdź kartery, wał i CVT", "Przegląd końcowy w warsztacie"],
+    caveat: "Karta planistyczna. Nie stanowi gotowej specyfikacji MHR ani gwarancji osiągów."
+  },
+  {
+    id: "minarelli-polini", name: "Minarelli poziomy / Polini Evolution — tor", level: "wyścig", platform: "Minarelli poziomy", displacement: "według dokładnego zestawu",
+    use: "Projekt sportowy / torowy", character: "Rodzina Evolution wymaga precyzyjnego potwierdzenia wariantu silnika i elementów towarzyszących.",
+    parts: [
+      { group: "Cylinder", examples: "Polini Evolution tylko w wersji przeznaczonej do danej platformy i chłodzenia", purpose: "Potwierdź SKU i zalecenia dotyczące wału." },
+      { group: "Wał", examples: "Komponenty przewidziane dla konkretnego zestawu i jego geometrii", purpose: "Nie zakładaj zgodności skoku i korbowodu między kitami." },
+      { group: "Wydech", examples: "Wydech dedykowany lub potwierdzony dla wybranego cylindra", purpose: "Weryfikuj mocowanie i charakterystykę." },
+      { group: "CVT i osprzęt", examples: "Przekładnia, gaźnik, membrana i zapłon zgodne z aplikacją", purpose: "Wszystkie elementy wymagają wspólnej weryfikacji." }
+    ],
+    checks: ["Potwierdź Minarelli horizontal i chłodzenie", "Odczytaj numer katalogowy zestawu", "Zleć kontrolę luzów i geometrii", "Zapisz wyniki testów i zmian"],
+    caveat: "Polini Evolution to rodzina produktów. Karta nie potwierdza dostępności konkretnej konfiguracji dla każdej wersji."
+  },
+  {
     id: "custom", name: "Projekt własny — dane zamiast zgadywania", level: "wyścig", platform: "uniwersalny", displacement: "według pomiarów",
     use: "Warsztat / tor po weryfikacji", character: "Konfiguracja budowana na wymiarach, dokumentacji i wynikach pomiarów.",
     parts: [
@@ -187,7 +235,7 @@ export default function SetupsPage() {
   ), [level, platform, query]);
 
   return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav />
-    <div className="mt-8"><Link href="/narzedzia" className="text-sm text-zinc-500 hover:text-white">← Narzędzia</Link><p className="mt-5 text-xs font-black uppercase tracking-[.3em] text-red-500">MotoHub / Warsztat 2T</p><h1 className="mt-2 text-4xl font-black sm:text-5xl">Baza setupów 2T</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">Karty platform silnikowych, przykładowe rodziny części i listy kontrolne. Przykłady pomagają rozpocząć research — przed zakupem sprawdź dokładny numer katalogowy i dokumentację konkretnej wersji silnika.</p></div>
+    <div className="mt-8"><Link href="/narzedzia" className="text-sm text-zinc-500 hover:text-white">← Narzędzia</Link><p className="mt-5 text-xs font-black uppercase tracking-[.3em] text-red-500">MotoHub / Warsztat 2T</p><h1 className="mt-2 text-4xl font-black sm:text-5xl">Baza setupów 2T</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">Rozbudowany katalog od OEM i Sport po high-end oraz projekty big-bore 80–95 cm³: Stage6, Italkit, Top Performances, Malossi, Polini i Airsal. Karty pokazują elementy do sprawdzenia i kompatybilność, nie zastępują katalogu producenta.</p></div>
     <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-4 md:grid-cols-[1fr_auto]"><label className="text-xs text-zinc-400">Szukaj silnika, części lub producenta<input value={query} onChange={e => setQuery(e.target.value)} placeholder="np. AM6, Yasuni, cylinder, wał…" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-500/50" /></label><div className="flex flex-wrap items-end gap-2">{[["wszystkie", "Wszystkie"], ["seryjny", "Serwis/OEM"], ["sport", "Sport"], ["wyścig", "Projekt/tor"]].map(([v, t]) => <button key={v} type="button" onClick={() => setLevel(v)} className={"rounded-xl border px-3 py-3 text-xs font-semibold " + (level === v ? "border-red-500/40 bg-red-500/15 text-red-200" : "border-white/10 text-zinc-400 hover:text-white")}>{t}</button>)}</div><label className="text-xs text-zinc-400 md:col-span-2">Platforma silnika<select value={platform} onChange={e => setPlatform(e.target.value as (typeof platforms)[number])} className="mt-2 w-full rounded-xl border border-white/10 bg-[#111] px-4 py-3 text-sm text-white">{platforms.map(p => <option key={p} value={p}>{p === "wszystkie" ? "Wszystkie platformy" : p}</option>)}</select></label></div>
     <div className="mt-4 flex flex-wrap justify-between gap-2 text-xs text-zinc-500"><span>{shown.length} kart platform / konfiguracji</span><span>{saved.length} zapisanych w bieżącej sesji</span></div>
     <div className="mt-4 grid gap-4 xl:grid-cols-2">{shown.map(s => <article key={s.id} className="rounded-2xl border border-white/10 bg-white/[.035] p-5">
