@@ -45,6 +45,7 @@ export default function ToolsPage(){
   return {wave,available,tuned,d1,d2,d3,dmax,l1,l2,l3,belly,baffle,stinger,stingerLength,header,
     disp:Math.PI/4*i.bore*i.bore*i.stroke*i.cylinders/1000,ratio:(dmax/d1)**2,portArea,effectivePortArea,bellyAreaRatio,stingerAreaRatio,total,balance};
  },[i]);
+ const [hoverPattern,setHoverPattern]=useState<string|null>(null);
  const patterns=useMemo(()=>[
   {name:"Rura wlotowa",type:"prostokąt",length:r.header,width:Math.PI*r.d1,detail:"Długość osiowa × obwód Ø"},
   {name:"Dyfuzor 1",type:"wycinek stożka",...conePattern(r.l1,r.d1,r.d2)},
@@ -109,8 +110,8 @@ export default function ToolsPage(){
     const centerX=ex+bodyLen*q*Math.cos(finalAngle);
     const centerY=ey-bodyLen*q*Math.sin(finalAngle);
     const push=Math.sin(Math.PI*q)*bulge;
-    x=centerX+push*(-Math.sin(finalAngle));
-    y=centerY+push*(-Math.cos(finalAngle));
+    x=centerX+push*Math.sin(finalAngle);
+    y=centerY+push*Math.cos(finalAngle);
     tx=Math.cos(finalAngle);ty=-Math.sin(finalAngle);
    }
    pts.push({x,y,w:widthAt(s),s});
@@ -227,7 +228,7 @@ export default function ToolsPage(){
                 {patterns.map((p: any) => {
                   const s = seg.find((x) => x[0] === p.name);
                   return (
-                    <tr key={p.name} className="border-t border-white/10">
+                    <tr key={p.name} onMouseEnter={()=>setHoverPattern(p.name)} onMouseLeave={()=>setHoverPattern(null)} className="border-t border-white/10 transition-colors hover:bg-white/[.045] cursor-crosshair">
                       <td className="px-3 py-3 font-medium">{p.name}</td>
                       <td className="px-3 py-3 text-xs text-zinc-500">{p.type}</td>
                       <td className="px-3 py-3 text-right font-mono">{round(p.length ?? p.slant)} mm</td>
@@ -239,6 +240,7 @@ export default function ToolsPage(){
                   );
                 })}
               </tbody></table></div>
+      {hoverPattern && (()=>{const p:any=patterns.find((x:any)=>x.name===hoverPattern); if(!p) return null; const w=Math.max(180,Math.min(430,(p.width??p.flatWidth??200)*1.25)); const h=Math.max(90,Math.min(260,(p.length??p.slant??100)*.72)); return <div className="pointer-events-none fixed bottom-6 right-6 z-50 w-[360px] rounded-2xl border border-white/15 bg-[#101010]/95 p-4 shadow-2xl backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-red-400">Podgląd rozwinięcia</p><p className="mt-1 text-sm font-bold">{p.name}</p></div><span className="text-[10px] text-zinc-500">do wycięcia</span></div><div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-3"><svg viewBox="0 0 520 280" className="h-44 w-full"><rect width="520" height="280" fill="#070707"/>{p.type==="prostokąt"?<><rect x="90" y="55" width="340" height="170" rx="2" fill="url(#patternMetal)" stroke="#d7d7d7" strokeWidth="2"/><line x1="90" y1="82" x2="430" y2="82" stroke="#777" strokeDasharray="6 5"/><text x="260" y="145" textAnchor="middle" fill="#aaa" fontSize="14">prostokąt</text></>:<path d={`M 260 28 L 440 238 L 80 238 Z`} fill="url(#patternMetal)" stroke="#d7d7d7" strokeWidth="2"/>}<defs><linearGradient id="patternMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#b9bcc0"/><stop offset=".5" stopColor="#3b3d40"/><stop offset="1" stopColor="#777a7e"/></linearGradient></defs><text x="260" y="263" textAnchor="middle" fill="#666" fontSize="10">kształt poglądowy • wymiar: {round(p.length ?? p.slant)} × {round(p.width ?? p.flatWidth)} mm</text></svg></div><div className="mt-3 grid grid-cols-2 gap-2 text-[10px]"><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">Długość</span><br/><b>{round(p.length ?? p.slant)} mm</b></div><div className="rounded-lg bg-white/[.04] p-2"><span className="text-zinc-500">Szerokość</span><br/><b>{round(p.width ?? p.flatWidth)} mm</b></div></div><p className="mt-2 text-[9px] leading-4 text-zinc-600">Podgląd pokazuje geometrię rozwinięcia. Dla stożka rzeczywisty kształt jest wycinkiem pierścienia; dokładne wymiary liczbowe są w tabeli.</p></div>})()}
       <div className="mt-3 rounded-xl border border-amber-500/15 bg-amber-500/[.05] p-3 text-[11px] leading-5 text-amber-200/80">To są wymiary rozwinięć dla prostych odcinków: prostokątów i wycinków stożków. Zakład na spawanie, kerf lasera oraz korektę po walcowaniu dodaj osobno. Kolanko nie jest tu udawane jako prostokąt — dla blachy wymaga osobnego rozwinięcia segmentowanego albo gotowego kolanka.</div></div>
      <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Kontrola</h2><div className="mt-4 space-y-3 text-sm"><div className="flex justify-between"><span className="text-zinc-500">Długość strojenia</span><b>{round(r.tuned)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Rura wlotowa</span><b>{round(r.header)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Stinger</span><b>Ø {round(r.stinger)} × {round(r.stingerLength)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">EGT</span><b>{round(i.egt)}°C</b></div></div><div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/[.06] p-4 text-xs leading-5 text-zinc-300"><b className="text-white">Ważne:</b> to model akustyczny i proporcjonalny punktu startowego. Port timing, temperatura, kształt kanału, króciec, tłumik i straty przepływu zmieniają rzeczywisty wynik.</div></div></div>
     <div className="rounded-3xl border border-white/10 bg-black/20 p-5"><h2 className="font-bold">Model i założenia</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Długość akustyczna jest tu traktowana jako model orientacyjny. Rzeczywista długość strojenia zależy m.in. od temperatury wzdłuż wydechu, prędkości dźwięku, korekty efektywnej długości oraz geometrii portu. Rozwinięcia blach są geometrią wykonawczą dla przyjętych wymiarów, ale nie są certyfikowanym projektem silnika.</p><p className="mt-3 text-xs text-zinc-600">Model nie jest pełną symulacją 1D gas-dynamics: temperatura wzdłuż układu, straty, korekta efektywnej długości, tłumik i dokładny kształt portu wymagają dalszej walidacji.</p></div>
