@@ -287,6 +287,56 @@ export default function ToolsPage(){
      <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Kontrola</h2><div className="mt-4 space-y-3 text-sm"><div className="flex justify-between"><span className="text-zinc-500">Długość strojenia</span><b>{round(r.tuned)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Rura wlotowa</span><b>{round(r.header)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Stinger</span><b>Ø {round(r.stinger)} × {round(r.stingerLength)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">EGT</span><b>{round(i.egt)}°C</b></div></div><div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/[.06] p-4 text-xs leading-5 text-zinc-300"><b className="text-white">Ważne:</b> to model akustyczny i proporcjonalny punktu startowego. Port timing, temperatura, kształt kanału, króciec, tłumik i straty przepływu zmieniają rzeczywisty wynik.</div></div></div>
     <div className="rounded-3xl border border-white/10 bg-black/20 p-5"><h2 className="font-bold">Model i założenia</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Długość akustyczna jest tu traktowana jako model orientacyjny. Rzeczywista długość strojenia zależy m.in. od temperatury wzdłuż wydechu, prędkości dźwięku, korekty efektywnej długości oraz geometrii portu. Rozwinięcia blach są geometrią wykonawczą dla przyjętych wymiarów, ale nie są certyfikowanym projektem silnika.</p><p className="mt-3 text-xs text-zinc-600">Model nie jest pełną symulacją 1D gas-dynamics: temperatura wzdłuż układu, straty, korekta efektywnej długości, tłumik i dokładny kształt portu wymagają dalszej walidacji.</p></div>
    </section>
+
+  <section className="mt-8 rounded-3xl border border-white/10 bg-white/[.025] p-5">
+   <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div>
+     <p className="text-[10px] font-bold uppercase tracking-[.2em] text-red-400">Baza techniczna</p>
+     <h2 className="mt-1 text-xl font-bold">Oleje 2T — zbiór informacji</h2>
+     <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">Porównanie parametrów deklarowanych w kartach technicznych producentów. Brak wartości oznaczony jest jako „—”.</p>
+    </div>
+    <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-zinc-500">Dane techniczne • aktualizować przy zmianie karty produktu</div>
+   </div>
+   {(() => {
+    type Oil={producer:string;name:string;base:string;jaso:string;api:string;iso:string;v40:string;v100:string;density:string;flash:string;pour:string;tbn:string;notes:string};
+    const oils:Oil[]=[
+     {producer:"Motul",name:"710 2T",base:"100% syntetyczny • ester",jaso:"FD",api:"TC",iso:"L-EGD",v40:"70.2 mm²/s",v100:"10.9 mm²/s",density:"0.877 g/cm³",flash:"116°C",pour:"-57°C",tbn:"2.1",notes:"Wysokowydajnościowy olej 2T; dane z TDS 2025"},
+     {producer:"Castrol",name:"POWER1 2T",base:"półsyntetyczny",jaso:"FD",api:"TC",iso:"L-EGD",v40:"36.1 mm²/s",v100:"6.9 mm²/s",density:"0.862 g/ml",flash:"73°C",pour:"-42°C",tbn:"—",notes:"Clean Burn Formula; wartości typowe z PDS"},
+     {producer:"Castrol",name:"POWER1 2T",base:"półsyntetyczny",jaso:"FD",api:"TC",iso:"L-EGD",v40:"36.14 mm²/s",v100:"25.4 mm²/s",density:"0.862 g/ml",flash:"66°C",pour:"-42°C",tbn:"—",notes:"Osobna karta produktu/rynek — zachowano jako oddzielny wpis źródłowy"},
+     {producer:"Castrol",name:"2T",base:"mineralny",jaso:"FB",api:"—",iso:"—",v40:"92 mm²/s",v100:"10.75 mm²/s",density:"0.8872 g/ml",flash:"235°C",pour:"-12°C",tbn:"0.66",notes:"Mineralny olej 2T; low-ash formulation"},
+     {producer:"Castrol",name:"POWER1 Scooter 2T",base:"—",jaso:"FD",api:"TC+",iso:"L-EGD",v40:"78.6 mm²/s",v100:"9.67 mm²/s",density:"0.890 g/ml",flash:"—",pour:"—",tbn:"—",notes:"Produkt 2T do skuterów; dane zależne od konkretnej karty rynku"},
+     {producer:"Castrol",name:"POWER1 ULTIMATE 2T",base:"—",jaso:"FD",api:"TC",iso:"L-EGD",v40:"—",v100:"—",density:"—",flash:"—",pour:"—",tbn:"—",notes:"Producent deklaruje API TC, ISO-L-EGD i JASO FD"},
+    ];
+    const [q,setQ]=useState("");
+    const [filter,setFilter]=useState("Wszystkie");
+    const filters=["Wszystkie","JASO FD","JASO FC","JASO FB","ISO-L-EGD","API TC"];
+    const ok=(o:Oil)=>filter==="Wszystkie"||filter==="JASO "+o.jaso||(filter==="ISO-L-EGD"&&o.iso==="L-EGD")||(filter==="API TC"&&o.api.includes("TC"));
+    const shown=oils.filter(o=>ok(o)&&(o.producer+" "+o.name+" "+o.base+" "+o.notes).toLowerCase().includes(q.toLowerCase()));
+    return <div className="mt-5">
+     <div className="mb-4 flex flex-col gap-2 md:flex-row">
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Szukaj producenta, produktu, bazy..." className="h-10 flex-1 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-red-500/40"/>
+      <select value={filter} onChange={e=>setFilter(e.target.value)} className="h-10 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-zinc-300 outline-none">{filters.map(f=><option key={f}>{f}</option>)}</select>
+     </div>
+     <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <table className="min-w-[1500px] w-full text-left text-xs">
+       <thead className="bg-white/[.04] text-zinc-500"><tr>
+        {["Producent","Produkt","Baza / rodzaj","JASO","API","ISO","ν 40°C","ν 100°C","Gęstość","Temp. zapłonu","Temp. płynięcia","TBN","Uwagi"].map(h=><th key={h} className="px-3 py-3">{h}</th>)}
+       </tr></thead>
+       <tbody>{shown.map((o,n)=><tr key={o.producer+o.name+n} className="border-t border-white/[.06] hover:bg-white/[.025]">
+        <td className="px-3 py-3 font-medium text-zinc-300">{o.producer}</td><td className="px-3 py-3 font-bold text-white">{o.name}</td><td className="px-3 py-3 text-zinc-400">{o.base}</td>
+        <td className="px-3 py-3">{o.jaso==="FD"?<span className="rounded-md bg-red-500/10 px-2 py-1 text-red-300">FD</span>:o.jaso}</td>
+        <td className="px-3 py-3 text-zinc-300">{o.api}</td><td className="px-3 py-3 text-zinc-300">{o.iso}</td><td className="px-3 py-3 text-zinc-400">{o.v40}</td><td className="px-3 py-3 text-zinc-400">{o.v100}</td><td className="px-3 py-3 text-zinc-400">{o.density}</td><td className="px-3 py-3 text-zinc-400">{o.flash}</td><td className="px-3 py-3 text-zinc-400">{o.pour}</td><td className="px-3 py-3 text-zinc-400">{o.tbn}</td><td className="max-w-[280px] px-3 py-3 leading-5 text-zinc-500">{o.notes}</td>
+       </tr>)}{shown.length===0&&<tr><td colSpan={13} className="px-4 py-10 text-center text-zinc-600">Brak wyników.</td></tr>}</tbody>
+      </table>
+     </div>
+     <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="rounded-xl border border-white/10 bg-black/15 p-3 text-xs leading-5 text-zinc-500"><b className="text-zinc-300">Temperatura zapłonu</b><br/>To parametr laboratoryjny określający temperaturę, przy której pary mogą się zapalić. Nie jest temperaturą spalania w cylindrze.</div>
+      <div className="rounded-xl border border-white/10 bg-black/15 p-3 text-xs leading-5 text-zinc-500"><b className="text-zinc-300">Lepkość ν</b><br/>Podawana w mm²/s (cSt) przy konkretnej temperaturze. Wartości z różnych kart należy porównywać razem z metodą badania.</div>
+      <div className="rounded-xl border border-white/10 bg-black/15 p-3 text-xs leading-5 text-zinc-500"><b className="text-zinc-300">Klasy JASO / API / ISO</b><br/>Są to klasyfikacje i wymagania jakościowe. Nie są pojedynczym wskaźnikiem „lepszości” produktu.</div>
+     </div>
+    </div>;
+   })()}
+  </section>
   </div>
  </div></main>;
 }
