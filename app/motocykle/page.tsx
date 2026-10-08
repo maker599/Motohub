@@ -60,6 +60,18 @@ const bikes = [
 ];
 
 const types = ["Naked", "Sport", "Adventure", "Touring", "Enduro", "MX", "Cruiser"];
+
+const previewImages = [
+  "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1558981285-6f0c94958bb6?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=85",
+];
+
+function getPreviewImage(index: number) {
+  return previewImages[index % previewImages.length];
+}
+
 const brands = ["Yamaha", "Honda", "Suzuki", "BMW", "Kawasaki", "Ducati", "KTM", "Husqvarna", "GasGas", "Beta", "TM Racing", "Aprilia", "Triumph"];
 
 export default function MotorcyclesPage() {
@@ -136,7 +148,7 @@ export default function MotorcyclesPage() {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {filtered.map((bike) => (
                 <Link key={bike.id} href={"/motocykle/"+bike.id} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.03] transition hover:-translate-y-1 hover:border-red-500/30">
-                  <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900"><div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,.12),transparent_42%),linear-gradient(135deg,#27272a,#09090b)] transition duration-500 group-hover:scale-105"><svg viewBox="0 0 640 300" className="h-[82%] w-[92%] text-zinc-300" aria-hidden="true"><path d="M145 210h350M180 210l55-72h105l55 72M235 138l-35-28m140 28 48-45m-11 117c0-30 24-54 54-54s54 24 54 54-24 54-54 54-54-24-54-54Zm-205 0c0-30 24-54 54-54s54 24 54 54-24 54-54 54-54-24-54-54Z" fill="none" stroke="currentColor" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/><path d="M285 138h72l38 37-72 10-45-28z" fill="currentColor" opacity=".35"/><text x="320" y="65" textAnchor="middle" fill="currentColor" fontSize="26" fontWeight="800" letterSpacing="3">{bike.brand.toUpperCase()}</text><text x="320" y="95" textAnchor="middle" fill="currentColor" fontSize="22" fontWeight="600">{bike.model}</text></svg></div><div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div></div>
+                  <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900"><img src={getPreviewImage(bikes.indexOf(bike))} alt={`${bike.brand} ${bike.model}`} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /><div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div></div>
                   <div className="p-5"><p className="text-xs font-bold uppercase tracking-wider text-red-400">{bike.brand}</p><h2 className="mt-1 text-xl font-bold">{bike.model}</h2><div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500"><span>{bike.engine}</span><span>{bike.power}</span><span>{bike.year}</span><span>Sprawdź →</span></div></div>
                 </Link>
               ))}
