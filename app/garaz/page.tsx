@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import SiteNav from "../SiteNav";
 import { useEffect, useState } from "react";
+import SiteNav from "../SiteNav";
 
 type Item = { id:string; nickname:string|null; mileage:number|null; motorcycles:{brand:string;model:string;year:number;engine_cc:number|null;power_hp:number|null;motorcycle_type:string|null}|null };
 
