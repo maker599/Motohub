@@ -8,6 +8,8 @@ type Item = {
   id: string;
   nickname: string | null;
   mileage: number | null;
+  model_year: number | null;
+  color: string | null;
   motorcycles: {
     id?: string;
     brand: string;
@@ -16,6 +18,7 @@ type Item = {
     engine_cc: number | null;
     power_hp: number | null;
     motorcycle_type: string | null;
+    technical_description: string | null;
   } | null;
 };
 
@@ -123,11 +126,13 @@ export default function GaragePage() {
                           <div>
                             <p className="text-xs font-bold uppercase tracking-[.2em] text-red-400">{bike?.motorcycle_type ?? "Motocykl"}</p>
                             <h2 className="mt-1 text-2xl font-black">{bike?.brand ?? "Nieznana marka"} {bike?.model ?? ""}</h2>
+                            {item.color && <p className="mt-1 text-xs text-zinc-500">Kolor: {item.color}</p>}
                           </div>
-                          <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-bold text-zinc-400">{bike?.year ?? "—"}</span>
+                          <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-bold text-zinc-400">{item.model_year ?? bike?.year ?? "—"}</span>
                         </div>
                         <div className="p-5">
-                          {item.nickname && <p className="mb-4 text-sm font-medium text-zinc-300">„{item.nickname}”</p>}
+                          {item.nickname && <p className="mb-3 text-sm font-medium text-zinc-300">„{item.nickname}”</p>}
+                          {bike?.technical_description && <p className="mb-4 text-sm leading-6 text-zinc-500">{bike.technical_description}</p>}
                           <div className="grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-black/20 py-3">
                             <div className="px-3 text-center"><p className="text-xs text-zinc-600">Silnik</p><p className="mt-1 text-sm font-bold">{bike?.engine_cc ?? "—"} <span className="font-normal text-zinc-600">cc</span></p></div>
                             <div className="px-3 text-center"><p className="text-xs text-zinc-600">Moc</p><p className="mt-1 text-sm font-bold">{bike?.power_hp ?? "—"} <span className="font-normal text-zinc-600">KM</span></p></div>
