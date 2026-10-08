@@ -66,7 +66,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
         <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900 to-[#101010] p-8 sm:p-12 lg:p-16">
-          <div className="max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.25em] text-red-500">Gotowy?</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Wskakuj do MotoHub.</h2><p className="mt-5 leading-7 text-zinc-400">Załóż konto i zacznij budować swoje miejsce w świecie motocykli.</p><Link href={loggedIn ? "/garaz" : "/rejestracja"} className="mt-8 inline-block rounded-full bg-white px-7 py-4 font-bold text-black transition hover:bg-zinc-200">Zacznij teraz</Link></div>
+          <div className="max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.25em] text-red-500">Gotowy?</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Wskakuj do MotoHub.</h2><p className="mt-5 leading-7 text-zinc-400">Załóż konto i zacznij budować swoje miejsce w świecie motocykli.</p><Link href="/rejestracja" className="mt-8 inline-block rounded-full bg-white px-7 py-4 font-bold text-black transition hover:bg-zinc-200">Zacznij teraz</Link></div>
         </div>
       </section>
 
