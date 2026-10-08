@@ -86,6 +86,78 @@ const setups: Setup[] = [
     caveat: "M5x1 to rodzina oznaczeń, a nie jeden identyczny silnik. Potwierdź dokładny wariant."
   },
   {
+    id: "am6-top-86", name: "AM6 / Top Performances 86 — karta projektu", level: "wyścig", platform: "AM6", displacement: "klasa ok. 86 cm³ — potwierdź konkretny kit",
+    use: "Projekt torowy / warsztat", character: "Duży zestaw wymaga traktowania cylindra, wału, wydechu i skrzyni korbowej jako jednego projektu.",
+    parts: [
+      { group: "Cylinder", examples: "Top Performances / TPR — wyszukaj dokładny zestaw przeznaczony do AM6; sama nazwa 86 nie potwierdza wersji", purpose: "Zweryfikuj rzeczywistą pojemność, średnicę, skok i dokumentację producenta." },
+      { group: "Wał i dół silnika", examples: "Wał i korbowód z potwierdzoną zgodnością z konkretnym zestawem; łożyska i uszczelniacze dobrane do aplikacji", purpose: "Weryfikacja geometrii, luzów i zakresu pracy przez specjalistę." },
+      { group: "Wydech", examples: "Komora high-end dedykowana do danego cylindra i ramy", purpose: "Mocowanie i charakterystyka muszą odpowiadać dokumentacji cylindra." },
+      { group: "Osprzęt", examples: "Gaźnik, membrana, zapłon i sprzęgło wskazane w dokumentacji zestawu", purpose: "Nie zakładaj uniwersalnych ustawień ani kompatybilności między producentami." }
+    ],
+    checks: ["Potwierdź SKU, rocznik i bazę silnika", "Poproś specjalistę o kontrolę karterów i luzów", "Zweryfikuj chłodzenie, smarowanie i zapłon", "Ustal przeznaczenie torowe i wymagania bezpieczeństwa"],
+    caveat: "Karta koncepcyjna do planowania zakupów. Nie potwierdza, że konkretny zestaw Top Performances 86 pasuje do każdego AM6."
+  },
+  {
+    id: "am6-stage6-88", name: "AM6 / Stage6 — projekt klasy 88", level: "wyścig", platform: "AM6", displacement: "klasa ok. 88 cm³ — do weryfikacji",
+    use: "Projekt high-end / tor", character: "Najpierw identyfikacja dokładnego cylindra i jego karty technicznej; oznaczenie pojemności nie wystarcza do doboru reszty.",
+    parts: [
+      { group: "Cylinder", examples: "Stage6 R/T lub inna seria wyłącznie wtedy, gdy katalog producenta potwierdza konkretny zestaw i platformę", purpose: "Nie przypisuj serii Stage6 R/T automatycznie do pojemności 88 cm³." },
+      { group: "Wał", examples: "Zestaw wału / korbowodu rekomendowany dla wybranego cylindra", purpose: "Zgodność skoku, długości korbowodu, sworznia i luzów montażowych." },
+      { group: "Wydech i dolot", examples: "Komora, króciec, membrana i gaźnik z potwierdzoną aplikacją", purpose: "Cały przepływ i rezonans powinny być oceniane jako system." },
+      { group: "Zapłon i sprzęgło", examples: "Komponenty dobrane według limitów i dokumentacji zestawu", purpose: "Kontrola kompatybilności elektrycznej i przenoszenia obciążenia." }
+    ],
+    checks: ["Zweryfikuj numer katalogowy przed zakupem", "Potwierdź zgodność zestawu z karterami AM6", "Zleć pomiar montażowy i kontrolę luzów", "Wyniki weryfikuj na hamowni przez fachowca"],
+    caveat: "To nazwa klasy projektu, a nie twierdzenie, że Stage6 ma uniwersalny kit 88 cm³ pasujący do AM6."
+  },
+  {
+    id: "derbi-italkit", name: "Derbi D50B0 / Italkit — high-end", level: "wyścig", platform: "Derbi D50B0", displacement: "według konkretnego zestawu",
+    use: "Projekt torowy / specjalistyczny", character: "Konfiguracja zależy od dokładnej rodziny Italkit, kodu silnika i dostępnych elementów towarzyszących.",
+    parts: [
+      { group: "Cylinder", examples: "Italkit — wybierz konkretny kit wyraźnie katalogowany do D50B0; nie przenoś specyfikacji AM6", purpose: "Potwierdź średnicę, skok, głowicę i zawartość zestawu." },
+      { group: "Wał i łożyska", examples: "Komponenty przewidziane przez producenta zestawu lub wyspecjalizowany warsztat", purpose: "Weryfikacja obciążeń i geometrii całego dołu silnika." },
+      { group: "Wydech", examples: "Wydech pod konkretny cylinder i kąty portów", purpose: "Kształt komory musi być dopasowany do konkretnej specyfikacji." },
+      { group: "Zasilanie i zapłon", examples: "Gaźnik, membrana i zapłon wskazane dla wybranej wersji", purpose: "Ustawienia zależą od części, paliwa i pomiarów; nie kopiuj gotowych wartości." }
+    ],
+    checks: ["Sprawdź, czy kit jest dokładnie dla D50B0", "Porównaj instrukcję i numery katalogowe", "Skontroluj chłodzenie i szczelność", "Przeprowadź walidację w warsztacie"],
+    caveat: "Italkit ma różne rodziny i aplikacje. Ta karta nie potwierdza dostępności ani dopasowania konkretnego zestawu."
+  },
+  {
+    id: "scooter-88", name: "Skuter 2T / klasa 88 — projekt big bore", level: "wyścig", platform: "Piaggio Hi-Per2", displacement: "klasa 80–90 cm³ — zależnie od zestawu",
+    use: "Skuter torowy / projekt custom", character: "Przy skuterze trzeba zweryfikować nie tylko silnik, ale też przekładnię CVT, mocowania i chłodzenie.",
+    parts: [
+      { group: "Cylinder", examples: "Stage6, Malossi, Polini lub Italkit — tylko konkretne SKU dla wskazanego silnika i chłodzenia", purpose: "Nie wszystkie serie producentów występują w każdej pojemności i platformie." },
+      { group: "Wał i kartery", examples: "Wał i obróbka tylko według dokumentacji konkretnego zestawu", purpose: "Kontrola prześwitów i geometrii przez wyspecjalizowany warsztat." },
+      { group: "Wydech", examples: "Komora do konkretnego cylindra, mocowania i ramy", purpose: "Sprawdź miejsce, temperaturę i kompatybilność z osłonami." },
+      { group: "CVT", examples: "Warianty paska, wariatora i sprzęgła dobrane do aplikacji", purpose: "Elementy napędu muszą być kompatybilne i sprawdzone pod obciążeniem." }
+    ],
+    checks: ["Potwierdź wersję Hi-Per2 i chłodzenie", "Sprawdź mocowania i prześwity", "Zleć kontrolę wału i karterów", "Nie traktuj ustawień CVT z innego skutera jako recepty"],
+    caveat: "Przykładowa klasa pojemności do katalogu projektów; dobór części wymaga dokładnej identyfikacji silnika."
+  },
+  {
+    id: "am6-95", name: "AM6 / klasa 90–95 — custom big bore", level: "wyścig", platform: "AM6", displacement: "90–95 cm³ — tylko jeśli potwierdza to konkretny projekt",
+    use: "Custom / tor, po konsultacji z warsztatem", character: "Nie jest to standardowy uniwersalny zestaw. Wymiary, dostępność części i zakres prac zależą od konkretnego projektu.",
+    parts: [
+      { group: "Cylinder / tuleja", examples: "Wyłącznie kompletny, udokumentowany zestaw dla określonej bazy; ewentualna obróbka tylko według projektu specjalisty", purpose: "Pojemność wynika z rzeczywistych wymiarów cylindra i skoku." },
+      { group: "Wał i dół silnika", examples: "Projektowane jako zgodny komplet: wał, korbowód, łożyska i kartery", purpose: "Wymaga weryfikacji wytrzymałości i geometrii, nie doboru na podstawie samej nazwy." },
+      { group: "Wydech i zasilanie", examples: "Wykonane lub dobrane pod dokumentację konkretnego cylindra", purpose: "Nie istnieje jedna konfiguracja pasująca do wszystkich projektów 90–95 cm³." },
+      { group: "Chłodzenie i bezpieczeństwo", examples: "Układ chłodzenia, smarowanie, hamulce i podwozie ocenione do przeznaczenia pojazdu", purpose: "Zmiana obciążeń wymaga całościowej oceny pojazdu." }
+    ],
+    checks: ["Poproś o pisemną specyfikację i listę części", "Potwierdź wymiary i dostępność komponentów", "Zleć ocenę projektu wyspecjalizowanemu warsztatowi", "Używaj tylko w odpowiednim, zgodnym z przepisami środowisku"],
+    caveat: "Nie przedstawiam 90–95 cm³ jako gotowego, katalogowego kitu AM6. To karta projektu custom, wymagającego potwierdzonych danych."
+  },
+  {
+    id: "minarelli-stage6", name: "Minarelli poziomy / Stage6 Sport-Pro — sport", level: "sport", platform: "Minarelli poziomy", displacement: "według konkretnego cylindra",
+    use: "Skuter / projekt sportowy", character: "Łagodniejsza karta porównawcza przed przejściem do konfiguracji high-end.",
+    parts: [
+      { group: "Cylinder", examples: "Stage6 Sport Pro / seria dostępna dla konkretnej wersji Minarelli horizontal", purpose: "Sprawdź kod aplikacji, chłodzenie i zawartość opakowania." },
+      { group: "Wydech", examples: "Wydech sportowy zgodny z wybranym cylindrem i ramą", purpose: "Unikaj łączenia części tylko dlatego, że mają tę samą markę." },
+      { group: "Gaźnik i dolot", examples: "Gaźnik i airbox zgodne z zaleceniami zestawu", purpose: "Po zmianie części potrzebna jest kontrola strojenia." },
+      { group: "CVT", examples: "Pasek, wariator i sprzęgło o specyfikacji dla danego skutera", purpose: "Weryfikacja dopasowania i stanu napędu." }
+    ],
+    checks: ["Ustal kod silnika i chłodzenie", "Sprawdź numer katalogowy Stage6", "Zweryfikuj wydech i mocowania", "Zadbaj o serwis CVT"],
+    caveat: "Stage6 Sport Pro to nazwa serii spotykana w różnych aplikacjach; nie zakładaj, że każdy wariant pasuje do każdego Minarelli."
+  },
+  {
     id: "custom", name: "Projekt własny — dane zamiast zgadywania", level: "wyścig", platform: "uniwersalny", displacement: "według pomiarów",
     use: "Warsztat / tor po weryfikacji", character: "Konfiguracja budowana na wymiarach, dokumentacji i wynikach pomiarów.",
     parts: [
