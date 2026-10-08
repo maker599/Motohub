@@ -88,6 +88,9 @@ const previewImages: Record<string, string> = {
   "aprilia-rs660": "https://www.motorrad-bilder.at/slideshows/291/023799/002_aprilia_rs660_2025.jpg",
   "ducati-monster": "https://images5.1000ps.net/images_bikekat/2025/5-Ducati/10402-Monster/013-638761504417645342-ducati-monster.jpg?bgcolor=rgba_39_42_44_0&format=webp&height=828&mode=pad&quality=80&scale=both&width=1472",
   "ducati-panigale-v2": "https://www.v-twins.com.au/cdn/shop/files/Panigale-V2-MY25-360_0017_it-18.webp?v=1733455225&width=1622",
+  "beta-rr300": "https://betamotorcycles.co.nz/wp-content/uploads/2024/10/RR-300-X-Pro-1.png",
+  "tm-en300": "https://bike.net/res/media/img/orig/ref/6bf/168474.jpg",
+  "aprilia-tuareg660": "https://cdn-listino.inmoto.it/2025/3/11/Aprilia_Tuareg_660_1f0b86499a.jpg",
 };
 
 function getPreviewImage(id: string) {
