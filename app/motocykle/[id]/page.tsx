@@ -30,7 +30,7 @@ export default async function BikePage({params}:{params:Promise<{id:string}>}) {
         <div className="rounded-[2rem] border border-white/10 bg-white/[.035] p-7">
           <p className="text-sm leading-6 text-zinc-400">{bike.description}</p>
           <div className="mt-7 grid grid-cols-2 gap-3">{[["Silnik",bike.engine],["Moc",bike.power],["Masa",bike.weight],["Rok",String(bike.year)]].map(([a,b])=><div key={a} className="rounded-2xl border border-white/10 bg-black/20 p-5"><p className="text-xs text-zinc-500">{a}</p><p className="mt-1 text-xl font-black">{b}</p></div>)}</div>
-          <AddToGarage slug={id} />
+          <AddToGarage slug={id} defaultYear={bike.year} />
           <Link href="/narzedzia" className="mt-3 block rounded-2xl border border-white/10 bg-white/[.03] p-4 transition hover:border-red-500/30 hover:bg-white/[.05]"><p className="text-sm font-bold">🔧 2T Exhaust Lab</p><p className="mt-1 text-xs text-zinc-500">Zaawansowany kalkulator geometrii komory rezonansowej.</p></Link>
         </div>
       </div>
