@@ -83,9 +83,9 @@ export default function ToolsPage(){
   // Realistic packaging: one exhaust elbow, plus a separate "push-out" control.
   // The second control bends the whole route outward smoothly instead of creating a second elbow.
   const elbowAngle=rad(Math.min(180,Math.max(0,bend)));
-  const elbowLen=Math.min(total*.06,Math.max(22,total*.04));
-  const elbowRadius=Math.max(24,elbowLen/Math.max(elbowAngle,.35));
-  const headerLen=Math.max(45,r.header*.45);
+  const elbowLen=Math.min(total*.12,Math.max(45,total*.08));
+  const elbowRadius=Math.max(35,elbowLen/Math.max(elbowAngle,.35));
+  const headerLen=Math.max(30,r.header*.22);
   const firstEnd=headerLen+elbowLen;
   const chamberStart=firstEnd;
   const bodyLen=Math.max(1,total-chamberStart);
