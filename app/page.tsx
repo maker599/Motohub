@@ -44,7 +44,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <Link
                 href="/logowanie"
-                className="hidden rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:text-white sm:block"
+                className="rounded-full px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:text-white"
               >
                 Zaloguj
               </Link>
