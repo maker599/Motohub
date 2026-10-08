@@ -96,7 +96,7 @@ export default function MotorcyclesPage() {
               ))}
             </div>
           )}
-        </section>        </div>
+        </section>
       </div>
     </main>
   );
