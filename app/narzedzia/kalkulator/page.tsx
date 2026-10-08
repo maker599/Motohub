@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import SiteNav from "../../SiteNav";
 
 type Inputs = {
@@ -27,6 +27,43 @@ const conePattern=(length:number,d1:number,d2:number)=>{
 };
 const label=(a:string,u:string,tip?:string)=><span className="mb-2 flex items-center justify-between text-xs font-medium text-zinc-400"><span className="flex items-center gap-1.5">{a}{tip&&<span title={tip} aria-label={tip} className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-white/15 text-[9px] font-bold text-zinc-500 hover:border-red-500/50 hover:text-red-400">?</span>}</span><span className="text-zinc-600">{u}</span></span>;
 
+
+function Exhaust3D({points}:{points:{x:number;y:number;w:number;s:number}[]}) {
+ const canvasRef=useRef<HTMLCanvasElement|null>(null);
+ const [autoRotate,setAutoRotate]=useState(true);
+ const dragRef=useRef<{x:number;angle:number}|null>(null);
+ const angleRef=useRef(0);
+ useEffect(()=>{
+  const canvas=canvasRef.current;if(!canvas)return;
+  const ctx=canvas.getContext("2d");if(!ctx)return;
+  let frame=0,last=0,width=320,height=390;
+  const resize=()=>{const rect=canvas.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,2);width=Math.max(320,rect.width);height=Math.max(300,rect.height);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);};
+  const draw=(now:number)=>{
+   if(autoRotate&&!dragRef.current)angleRef.current+=Math.min(40,now-last||16)*0.00035;
+   last=now;const a=angleRef.current,ca=Math.cos(a),sa=Math.sin(a);ctx.clearRect(0,0,width,height);
+   const cx=width/2,cy=height/2,minX=Math.min(...points.map(p=>p.x)),maxX=Math.max(...points.map(p=>p.x)),minY=Math.min(...points.map(p=>p.y)),maxY=Math.max(...points.map(p=>p.y));
+   const scale=Math.min((width-84)/Math.max(maxX-minX,1),(height-100)/Math.max(maxY-minY,1)),midX=(minX+maxX)/2,midY=(minY+maxY)/2;
+   const project=(x:number,y:number,z:number)=>{const xx=x-midX,rz=xx*sa+z*ca,rx=xx*ca-z*sa,perspective=850/(850+rz);return{x:cx+rx*scale*perspective,y:cy-(y-midY)*scale*perspective+rz*.045};};
+   ctx.fillStyle="#070707";ctx.fillRect(0,0,width,height);ctx.strokeStyle="rgba(255,255,255,.045)";ctx.lineWidth=1;
+   for(let x=cx%30;x<width;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,height);ctx.stroke();}
+   for(let y=cy%30;y<height;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(width,y);ctx.stroke();}
+   const rings=points.filter((_,i)=>i%2===0||i===points.length-1),sides=40;
+   const mesh=rings.map((p,index)=>{const prev=rings[Math.max(0,index-1)],next=rings[Math.min(rings.length-1,index+1)],dx=next.x-prev.x,dy=next.y-prev.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;return Array.from({length:sides},(_,j)=>{const t=j/sides*Math.PI*2;return project(p.x+nx*Math.cos(t)*p.w,p.y+ny*Math.cos(t)*p.w,Math.sin(t)*p.w);});});
+   for(let i=0;i<mesh.length-1;i++)for(let j=0;j<sides;j++){const j2=(j+1)%sides,p1=mesh[i][j],p2=mesh[i][j2],p3=mesh[i+1][j2],p4=mesh[i+1][j],light=(Math.sin(j/sides*Math.PI*2+a)+1)/2,shade=Math.round(38+light*125);ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.lineTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.closePath();ctx.fillStyle="rgb("+Math.round(shade*.93+18)+" "+Math.round(shade*.93+18)+" "+Math.round(shade*.93+22)+")";ctx.fill();if(j%5===0){ctx.strokeStyle="rgba(255,255,255,.11)";ctx.lineWidth=.6;ctx.stroke();}}
+   const step=Math.max(1,Math.floor(mesh.length/7));ctx.strokeStyle="rgba(0,0,0,.85)";ctx.lineWidth=2;
+   for(let i=step;i<mesh.length-1;i+=step){ctx.beginPath();mesh[i].forEach((p,j)=>j?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke();}
+   [0,mesh.length-1].forEach(i=>{ctx.beginPath();mesh[i].forEach((p,j)=>j?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.strokeStyle="#d4d4d8";ctx.lineWidth=1.4;ctx.stroke();});
+   ctx.fillStyle="#a1a1aa";ctx.font="10px ui-monospace, monospace";ctx.fillText("MODEL 3D • ROTACJA WOKÓŁ ŚRODKA",14,20);frame=requestAnimationFrame(draw);
+  };
+  resize();const observer=new ResizeObserver(resize);observer.observe(canvas);frame=requestAnimationFrame(draw);return()=>{cancelAnimationFrame(frame);observer.disconnect();};
+ },[points,autoRotate]);
+ return <div className="relative">
+  <canvas ref={canvasRef} onPointerDown={e=>{dragRef.current={x:e.clientX,angle:angleRef.current};e.currentTarget.setPointerCapture(e.pointerId);}} onPointerMove={e=>{if(dragRef.current)angleRef.current=dragRef.current.angle+(e.clientX-dragRef.current.x)*0.012;}} onPointerUp={()=>{dragRef.current=null;}} onPointerCancel={()=>{dragRef.current=null;}} className="h-[390px] w-full cursor-grab touch-pan-y active:cursor-grabbing" aria-label="Interaktywny model 3D komory wydechowej" />
+  <div className="absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/75 px-3 py-2 text-[10px] text-zinc-400">Przeciągnij model, aby obrócić</div>
+  <button type="button" onClick={()=>setAutoRotate(v=>!v)} className="absolute right-3 top-3 rounded-xl border border-white/15 bg-black/80 px-3 py-2 text-xs font-semibold hover:border-red-500/50">{autoRotate?"Ⅱ Wstrzymaj obrót":"▶ Wznów obrót"}</button>
+ </div>;
+}
+
 export default function ToolsPage(){
  const [i,setI]=useState(defaults);
  const [bend,setBend]=useState(0);
@@ -46,6 +83,7 @@ export default function ToolsPage(){
     disp:Math.PI/4*i.bore*i.bore*i.stroke*i.cylinders/1000,ratio:(dmax/d1)**2,portArea,effectivePortArea,bellyAreaRatio,stingerAreaRatio,total,balance};
  },[i]);
  const [hoverPattern,setHoverPattern]=useState<string|null>(null);
+ const [view3D,setView3D]=useState(false);
  const patterns=useMemo(()=>[
   {name:"Rura wlotowa",type:"prostokąt",length:r.header,width:Math.PI*r.d1,detail:"Długość osiowa × obwód Ø"},
   {name:"Dyfuzor 1",type:"wycinek stożka",...conePattern(r.l1,r.d1,r.d2)},
@@ -158,7 +196,7 @@ export default function ToolsPage(){
   })();
   const viewWidth=(maxX-minX)*scale+pad*2;
   const viewHeight=(maxY-minY)*scale+pad*2+yOffset*2;
-  return {outline,center,seams,flange,scale,viewWidth,viewHeight,viewBox:`0 0 ${viewWidth} ${viewHeight}`};
+  return {outline,center,seams,flange,scale,viewWidth,viewHeight,viewBox:`0 0 ${viewWidth} ${viewHeight}`,pts};
  },[r,bend,bend2]);
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
@@ -203,10 +241,10 @@ export default function ToolsPage(){
         </div>
        </div>
       </div>
-      <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy typowej komory 2T: flansza przy cylindrze, krótki header, płynne kolanko, dyfuzory, belly, przeciwstożek i stinger. Wypchnięcie wpływa na cały przebieg osiowy, nie tylko na jeden fragment.</p></div>
+      <div className="border-b border-white/10 px-5 py-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold">Podgląd komory</h2><p className="mt-1 text-xs text-zinc-500">Geometria aktualizuje się razem z parametrami i ustawieniami kolanek.</p></div><div className="flex rounded-xl border border-white/10 bg-black/40 p-1"><button type="button" onClick={()=>setView3D(false)} className={`rounded-lg px-3 py-2 text-xs font-bold transition ${!view3D?"bg-white/10 text-white":"text-zinc-500 hover:text-white"}`}>2D</button><button type="button" onClick={()=>setView3D(true)} className={`rounded-lg px-3 py-2 text-xs font-bold transition ${view3D?"bg-red-500/15 text-red-300":"text-zinc-500 hover:text-white"}`}>3D · obrót</button></div></div></div>
       <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
        <div className="relative min-h-[380px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
-        <svg viewBox={profile.viewBox} preserveAspectRatio="xMidYMid meet" className="h-auto max-h-[390px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
+        {view3D ? <Exhaust3D points={profile.pts}/> : <svg viewBox={profile.viewBox} preserveAspectRatio="xMidYMid meet" className="h-auto max-h-[390px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
          <defs>
           <linearGradient id="pipeMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d7d9dc"/><stop offset=".22" stopColor="#6f7278"/><stop offset=".5" stopColor="#222428"/><stop offset=".78" stopColor="#85888e"/><stop offset="1" stopColor="#17181b"/></linearGradient>
           <linearGradient id="bellyHot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9b2920"/><stop offset=".45" stopColor="#e55335"/><stop offset="1" stopColor="#4c0e0c"/></linearGradient>
@@ -222,11 +260,11 @@ export default function ToolsPage(){
          {profile.seams.map((s,n)=><line key={n} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke="#050505" strokeOpacity=".65" strokeWidth="2"/>)}
          <text x="42" y="34" fill="#777" fontSize="12" fontFamily="system-ui" letterSpacing="2">2T EXPANSION CHAMBER</text>
          <text x="42" y="52" fill="#555" fontSize="10" fontFamily="system-ui">Ø rośnie do belly, następnie maleje do przeciwstożka / stinger</text>
-         </svg>
-        <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
+         </svg>}
+        {!view3D && <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
          <p className="mt-1 text-xs text-zinc-300">Kolanko: {Math.min(180,180-bend)}° · Wypchnięcie: {Math.min(100,bend2)}% · LPM: {Math.round(r.total)} mm</p>
-        </div>
+        </div>}
        </div>
       </div>    </div><div className="grid gap-5 lg:grid-cols-2"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Rozwinięcia blach do wycięcia</h2><p className="mt-1 text-xs text-zinc-500">Dla prostych sekcji pokazuję rzeczywiste wymiary rozwinięcia przed walcowaniem i stożkowaniem, a nie samą długość osiową.</p><div className="mt-4 overflow-x-auto rounded-2xl border border-white/10"><table className="w-full min-w-[760px] text-sm"><thead className="bg-white/[.04] text-[11px] text-zinc-500"><tr><th className="px-3 py-3 text-left">Detal</th><th className="px-3 py-3 text-left">Typ rozwinięcia</th><th className="px-3 py-3 text-right">Dł. osiowa</th><th className="px-3 py-3 text-right">Szer. blachy</th><th className="px-3 py-3 text-right">D1</th><th className="px-3 py-3 text-right">D2</th><th className="px-3 py-3 text-right">Skos / kąt</th></tr></thead><tbody>
                 {patterns.map((p: any) => {
