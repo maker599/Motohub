@@ -5,7 +5,12 @@ export default function AddToGarage({ slug, defaultYear }: { slug: string; defau
   const [status, setStatus] = useState("");
   const [year, setYear] = useState(String(defaultYear));
   const [color, setColor] = useState("Czarny");
-  const colors = ["Czarny", "Biały", "Czerwony", "Niebieski", "Szary", "Zielony", "Pomarańczowy", "Żółty"];
+  const colors = [
+    { name: "Czarny", hex: "#18181b" }, { name: "Biały", hex: "#f4f4f5" },
+    { name: "Czerwony", hex: "#dc2626" }, { name: "Niebieski", hex: "#2563eb" },
+    { name: "Szary", hex: "#71717a" }, { name: "Zielony", hex: "#16a34a" },
+    { name: "Pomarańczowy", hex: "#f97316" }, { name: "Żółty", hex: "#eab308" },
+  ];
 
   async function add() {
     setStatus("Dodawanie...");
@@ -30,9 +35,10 @@ export default function AddToGarage({ slug, defaultYear }: { slug: string; defau
       </label>
       <label className="block">
         <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-500">Kolor</span>
-        <select value={color} onChange={(e) => setColor(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-500/40">
-          {colors.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div className="flex flex-wrap gap-2">
+          {colors.map((c) => <button type="button" key={c.name} title={c.name} aria-label={c.name} onClick={() => setColor(c.name)} className={`h-9 w-9 rounded-full border-2 transition hover:scale-105 ${color === c.name ? "border-white ring-2 ring-red-500/60 ring-offset-2 ring-offset-[#090909]" : "border-white/20"}`} style={{ backgroundColor: c.hex }} />)}
+        </div>
+        <p className="mt-2 text-xs text-zinc-500">Wybrany: <span className="text-zinc-300">{color}</span></p>
       </label>
     </div>
     <button onClick={add} className="rounded-full bg-red-500 px-6 py-3 font-bold transition hover:bg-red-400">{status === "Dodawanie..." ? status : "Dodaj do garażu"}</button>
