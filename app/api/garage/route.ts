@@ -16,7 +16,7 @@ export async function GET() {
   if (!supabaseUrl || !supabaseKey) return NextResponse.json({ error: "Brak konfiguracji Supabase." }, { status: 500 });
   const s = await session();
   if (!s) return NextResponse.json({ error: "Zaloguj się." }, { status: 401 });
-  const r = await fetch(`${supabaseUrl}/rest/v1/garage_motorcycles?select=id,nickname,mileage,notes,created_at,motorcycles(id,slug,brand,model,year,engine_cc,power_hp,motorcycle_type,image_url)&user_id=eq.${s.user.id}&order=created_at.desc`, { headers: { apikey: supabaseKey, Authorization: `Bearer ${s.token}` }, cache: "no-store" });
+  const r = await fetch(`${supabaseUrl}/rest/v1/garage_motorcycles?select=id,nickname,mileage,notes,model_year,color,created_at,motorcycles(id,slug,brand,model,year,engine_cc,power_hp,motorcycle_type,image_url,technical_description)&user_id=eq.${s.user.id}&order=created_at.desc`, { headers: { apikey: supabaseKey, Authorization: `Bearer ${s.token}` }, cache: "no-store" });
   const data = await r.json();
   if (!r.ok) return NextResponse.json({ error: "Nie udało się pobrać garażu." }, { status: r.status });
   return NextResponse.json({ items: data });
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   if (!supabaseUrl || !supabaseKey) return NextResponse.json({ error: "Brak konfiguracji Supabase." }, { status: 500 });
   const s = await session();
   if (!s) return NextResponse.json({ error: "Zaloguj się." }, { status: 401 });
-  const { slug, nickname, mileage, notes } = await request.json();
+  const { slug, nickname, mileage, notes, model_year, color } = await request.json();
   if (!slug) return NextResponse.json({ error: "Brak motocykla." }, { status: 400 });
   const bike = await fetch(`${supabaseUrl}/rest/v1/motorcycles?select=id&slug=eq.${encodeURIComponent(slug)}&limit=1`, { headers: { apikey: supabaseKey, Authorization: `Bearer ${s.token}` }, cache: "no-store" });
   const bikes = await bike.json();
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   const r = await fetch(`${supabaseUrl}/rest/v1/garage_motorcycles`, {
     method: "POST",
     headers: { apikey: supabaseKey, Authorization: `Bearer ${s.token}`, "Content-Type": "application/json", Prefer: "return=representation" },
-    body: JSON.stringify({ user_id: s.user.id, motorcycle_id: motorcycleId, nickname: nickname || null, mileage: mileage || null, notes: notes || null })
+    body: JSON.stringify({ user_id: s.user.id, motorcycle_id: motorcycleId, nickname: nickname || null, mileage: mileage || null, notes: notes || null, model_year: Number.isFinite(model_year) ? model_year : null, color: color || null })
   });
   const data = await r.json();
   if (!r.ok) return NextResponse.json({ error: data?.message ?? "Nie udało się dodać motocykla." }, { status: r.status });
