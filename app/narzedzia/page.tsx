@@ -2,9 +2,9 @@ import Link from "next/link";
 import SiteNav from "../SiteNav";
 
 const modules = [
-  { href: "/narzedzia/tuning-2t", tag: "SYMULATOR", title: "Moc i obroty 2T", desc: "Orientacyjna krzywa mocy i momentu dla wybranych parametrów silnika." },
-  { href: "/narzedzia/setupy-2t", tag: "BAZA", title: "Baza setupów 2T", desc: "Przeszukiwalne konfiguracje startowe i listy kontrolne dla popularnych pojemności." },
-  { href: "/narzedzia/kalkulator", tag: "KALKULATOR", title: "Kalkulator wydechu", desc: "Projektowy kalkulator geometrii komory rezonansowej i rozwinięć sekcji." },
+  { href: "/narzedzia/tuning-2t", tag: "SYMULATOR", title: "Moc i obroty 2T", desc: "Parametry cylindra, przykładowe presety AM6, Derbi, skuterów i Simsona oraz model porównawczy mocy." },
+  { href: "/narzedzia/setupy-2t", tag: "BAZA", title: "Baza setupów 2T", desc: "Platformy AM6, Derbi D50B0, Piaggio Hi-Per2, Minarelli poziomy i Simson; przykładowe części oraz kontrola kompatybilności." },
+  { href: "/narzedzia/kalkulator", tag: "KALKULATOR", title: "Kalkulator wydechu", desc: "Projekt geometrii komory rezonansowej, wymiary sekcji i eksport rysunku do wydruku." },
 ];
 
 export default function ToolsPage() {
