@@ -51,69 +51,52 @@ export default function MotorcyclesPage() {
           <p className="mt-4 max-w-2xl text-zinc-400">Przeglądaj modele, porównuj parametry i odkrywaj maszyny, które pasują do Twojego stylu jazdy.</p>
         </header>
 
-        <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-          <aside className="h-fit rounded-3xl border border-white/10 bg-white/[.03] p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="font-bold">Filtry</h2>
-              {(selectedTypes.length > 0 || selectedBrands.length > 0 || query) && (
-                <button onClick={clearFilters} className="text-xs font-bold text-red-400 hover:text-red-300">Wyczyść</button>
-              )}
+        <section>
+          <div className="rounded-2xl border border-white/10 bg-white/[.035] p-2 shadow-xl shadow-black/20 backdrop-blur">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+              <div className="relative min-w-0 flex-1">
+                <input aria-label="Szukaj motocykla" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Szukaj marki lub modelu..." className="w-full rounded-xl border border-transparent bg-black/20 px-4 py-3 pl-10 text-sm outline-none placeholder:text-zinc-600 focus:border-red-500/40 focus:bg-black/30" />
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">⌕</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <div className="group relative">
+                  <button type="button" className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${selectedTypes.length ? "border-red-500/40 bg-red-500/10 text-white" : "border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.07]"}`}>Typ{selectedTypes.length ? ` · ${selectedTypes.length}` : ""} <span className="ml-2 text-zinc-500">⌄</span></button>
+                  <div className="invisible absolute right-0 top-full z-20 mt-2 w-52 translate-y-1 rounded-2xl border border-white/10 bg-[#111] p-2 opacity-0 shadow-2xl transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    {types.map((type) => <label key={type} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/[.06]"><input type="checkbox" checked={selectedTypes.includes(type)} onChange={() => toggle(type, setSelectedTypes)} className="h-4 w-4 accent-red-500" />{type}</label>)}
+                  </div>
+                </div>
+                <div className="group relative">
+                  <button type="button" className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${selectedBrands.length ? "border-red-500/40 bg-red-500/10 text-white" : "border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.07]"}`}>Marka{selectedBrands.length ? ` · ${selectedBrands.length}` : ""} <span className="ml-2 text-zinc-500">⌄</span></button>
+                  <div className="invisible absolute right-0 top-full z-20 mt-2 w-52 translate-y-1 rounded-2xl border border-white/10 bg-[#111] p-2 opacity-0 shadow-2xl transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    {brands.map((brand) => <label key={brand} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/[.06]"><input type="checkbox" checked={selectedBrands.includes(brand)} onChange={() => toggle(brand, setSelectedBrands)} className="h-4 w-4 accent-red-500" />{brand}</label>)}
+                  </div>
+                </div>
+                {(selectedTypes.length > 0 || selectedBrands.length > 0 || query) && <button onClick={clearFilters} className="rounded-xl px-3 py-3 text-sm font-semibold text-zinc-500 transition hover:bg-white/[.05] hover:text-white">Wyczyść</button>}
+              </div>
             </div>
-            <label className="mt-6 block text-xs font-bold uppercase tracking-wider text-zinc-500">Typ</label>
-            <div className="mt-3 space-y-2">
-              {types.map((type) => (
-                <label key={type} className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-sm text-zinc-300 hover:bg-white/[.04]">
-                  <input type="checkbox" checked={selectedTypes.includes(type)} onChange={() => toggle(type, setSelectedTypes)} className="h-4 w-4 accent-red-500" />
-                  {type}
-                </label>
-              ))}
-            </div>
-            <label className="mt-7 block text-xs font-bold uppercase tracking-wider text-zinc-500">Marka</label>
-            <div className="mt-3 space-y-2">
-              {brands.map((brand) => (
-                <label key={brand} className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-sm text-zinc-300 hover:bg-white/[.04]">
-                  <input type="checkbox" checked={selectedBrands.includes(brand)} onChange={() => toggle(brand, setSelectedBrands)} className="h-4 w-4 accent-red-500" />
-                  {brand}
-                </label>
-              ))}
-            </div>
-          </aside>
+          </div>
 
-          <section>
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row">
-              <input aria-label="Szukaj motocykla" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Szukaj marki lub modelu..." className="w-full rounded-2xl border border-white/10 bg-white/[.04] px-5 py-4 text-sm outline-none placeholder:text-zinc-600 focus:border-red-500/50" />
-              <button onClick={() => setQuery(query.trim())} className="rounded-2xl bg-red-500 px-6 py-4 text-sm font-bold hover:bg-red-400">Szukaj</button>
+          <div className="mb-5 mt-5 flex items-center justify-between">
+            <p className="text-sm text-zinc-500"><span className="font-semibold text-zinc-300">{filtered.length}</span> {filtered.length === 1 ? "motocykl" : "motocykli"}</p>
+            {(selectedTypes.length > 0 || selectedBrands.length > 0 || query) && <p className="text-xs text-zinc-600">Aktywne filtry</p>}
+          </div>
+          {filtered.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-white/10 bg-white/[.02] p-12 text-center">
+              <p className="text-lg font-bold">Brak wyników</p>
+              <p className="mt-2 text-sm text-zinc-500">Zmień filtry albo wyszukiwaną frazę.</p>
+              <button onClick={clearFilters} className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black">Wyczyść filtry</button>
             </div>
-            <div className="mb-5 flex items-center justify-between">
-              <p className="text-sm text-zinc-500">{filtered.length} {filtered.length === 1 ? "motocykl" : "motocykli"}</p>
-              {(selectedTypes.length > 0 || selectedBrands.length > 0 || query) && <p className="text-xs text-zinc-600">Aktywne filtry</p>}
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((bike) => (
+                <Link key={bike.id} href={"/motocykle/"+bike.id} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.03] transition hover:-translate-y-1 hover:border-red-500/30">
+                  <div className="flex aspect-[16/10] items-end bg-gradient-to-br from-zinc-700 via-zinc-900 to-black p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div>
+                  <div className="p-5"><p className="text-xs font-bold uppercase tracking-wider text-red-400">{bike.brand}</p><h2 className="mt-1 text-xl font-bold">{bike.model}</h2><div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500"><span>{bike.engine}</span><span>{bike.power}</span><span>{bike.year}</span><span>Sprawdź →</span></div></div>
+                </Link>
+              ))}
             </div>
-            {filtered.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-white/10 bg-white/[.02] p-12 text-center">
-                <p className="text-lg font-bold">Brak wyników</p>
-                <p className="mt-2 text-sm text-zinc-500">Zmień filtry albo wyszukiwaną frazę.</p>
-                <button onClick={clearFilters} className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black">Wyczyść filtry</button>
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {filtered.map((bike) => (
-                  <Link key={bike.id} href={"/motocykle/"+bike.id} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.03] transition hover:-translate-y-1 hover:border-red-500/30">
-                    <div className="flex aspect-[16/10] items-end bg-gradient-to-br from-zinc-700 via-zinc-900 to-black p-5">
-                      <span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span>
-                    </div>
-                    <div className="p-5">
-                      <p className="text-xs font-bold uppercase tracking-wider text-red-400">{bike.brand}</p>
-                      <h2 className="mt-1 text-xl font-bold">{bike.model}</h2>
-                      <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500">
-                        <span>{bike.engine}</span><span>{bike.power}</span><span>{bike.year}</span><span>Sprawdź →</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
+          )}
+        </section>        </div>
       </div>
     </main>
   );
