@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AddToGarage from "./AddToGarage";
 
 const bikes: Record<string, {brand:string; model:string; year:number; engine:string; power:string; type:string; weight:string}> = {
   "yamaha-mt07": {brand:"Yamaha",model:"MT-07",year:2025,engine:"689 cm³",power:"73 KM",type:"Naked",weight:"183 kg"},
@@ -18,7 +19,7 @@ export default async function BikePage({params}:{params:Promise<{id:string}>}) {
       <div className="aspect-[4/3] rounded-[2rem] bg-gradient-to-br from-zinc-700 via-zinc-900 to-black" />
       <div className="py-4"><p className="text-sm font-bold uppercase tracking-[.25em] text-red-500">{bike.brand}</p><h1 className="mt-2 text-5xl font-black">{bike.model}</h1><p className="mt-4 text-zinc-400">{bike.type} · {bike.year}</p>
       <div className="mt-10 grid grid-cols-2 gap-3">{[["Silnik",bike.engine],["Moc",bike.power],["Masa",bike.weight],["Rok",String(bike.year)]].map(([a,b])=><div key={a} className="rounded-2xl border border-white/10 bg-white/[.03] p-5"><p className="text-xs text-zinc-500">{a}</p><p className="mt-1 text-lg font-bold">{b}</p></div>)}</div>
-      <Link href="/logowanie" className="mt-7 inline-block rounded-full bg-red-500 px-6 py-3 font-bold">Dodaj do garażu</Link></div>
+      <AddToGarage slug={id} /></div>
     </div>
   </div></main>;
 }
