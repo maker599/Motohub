@@ -49,7 +49,7 @@ export default function ToolsPage(){
  ];
  const profile=useMemo(()=>{
   const total=Math.max(r.total,1);
-  const n=220;
+  const n=240;
   const pts:{x:number;y:number;w:number;s:number}[]=[];
   const widthAt=(s:number)=>{
    let acc=0;
@@ -63,31 +63,40 @@ export default function ToolsPage(){
    return r.stinger*.88;
   };
 
-  // Realistic 2T layout: the cylinder-side header wraps down and back in a
-  // compact U before the expansion chamber continues away from the cylinder.
-  const uLen=Math.min(total*.30,Math.max(110,total*.24));
-  const uRadius=Math.max(45,uLen/2);
-  const bodyStart=uLen;
-  const bodyLen=Math.max(1,total-bodyStart);
+  // Typical 2T packaging: cylinder flange -> short header -> one exhaust elbow -> chamber.
+  // No U-bend: the elbow only changes the direction of the pipe once.
+  const elbowAngle=rad(Math.min(90,Math.max(0,bend)));
+  const elbowLen=Math.min(total*.18,Math.max(55,total*.12));
+  const elbowRadius=Math.max(35,elbowLen/Math.max(elbowAngle,.35));
+  const headerLen=Math.max(45,r.header*.55);
+  const chamberStart=headerLen+elbowLen;
+  const bodyLen=Math.max(1,total-chamberStart);
+
   for(let k=0;k<=n;k++){
    const s=total*k/n;
-   let x:number,y:number;
-   if(s<=uLen){
-    const t=s/uLen;
-    const a=Math.PI*t;
-    x=uRadius*(1-Math.cos(a));
-    y=-uRadius*Math.sin(a);
+   let x:number,y:number,tx:number,ty:number;
+   if(s<=headerLen){
+    x=s;y=0;tx=1;ty=0;
+   }else if(s<=chamberStart){
+    const q=(s-headerLen)/Math.max(elbowLen,1);
+    const a=elbowAngle*q;
+    x=headerLen+elbowRadius*Math.sin(a);
+    y=-elbowRadius*(1-Math.cos(a));
+    tx=Math.cos(a);ty=-Math.sin(a);
    }else{
-    const q=(s-bodyStart)/bodyLen;
-    x=2*uRadius + bodyLen*q;
-    y=0;
+    const q=(s-chamberStart)/bodyLen;
+    const ex=headerLen+elbowRadius*Math.sin(elbowAngle);
+    const ey=-elbowRadius*(1-Math.cos(elbowAngle));
+    x=ex+bodyLen*q*Math.cos(elbowAngle);
+    y=ey-bodyLen*q*Math.sin(elbowAngle);
+    tx=Math.cos(elbowAngle);ty=-Math.sin(elbowAngle);
    }
    pts.push({x,y,w:widthAt(s),s});
   }
 
-  const minX=Math.min(...pts.map(p=>p.x-p.w)),maxX=Math.max(...pts.map(p=>p.x+p.w));
-  const minY=Math.min(...pts.map(p=>p.y-p.w)),maxY=Math.max(...pts.map(p=>p.y+p.w));
-  const pad=80;
+  const minX=Math.min(...pts.map(p=>p.x-p.w))-55,maxX=Math.max(...pts.map(p=>p.x+p.w))+55;
+  const minY=Math.min(...pts.map(p=>p.y-p.w))-55,maxY=Math.max(...pts.map(p=>p.y+p.w))+55;
+  const pad=70;
   const scale=Math.min(1180/Math.max(maxX-minX,1),560/Math.max(maxY-minY,1));
   const tx=(x:number)=>pad+(x-minX)*scale;
   const ty=(y:number)=>pad+(maxY-y)*scale;
@@ -110,7 +119,19 @@ export default function ToolsPage(){
    const dx=next.x-prev.x,dy=next.y-prev.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
    return {x1:tx(p.x+nx*p.w),y1:ty(p.y+ny*p.w),x2:tx(p.x-nx*p.w),y2:ty(p.y-ny*p.w)};
   });
-  return {outline,center,seams,viewBox:`0 0 ${Math.max(1320,(maxX-minX)*scale+pad*2)} ${Math.max(700,(maxY-minY)*scale+pad*2)}`};
+  const flange=(()=>{
+   const p=pts[0],next=pts[1];
+   const dx=next.x-p.x,dy=next.y-p.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+   const fw=Math.max(11,p.w*1.22),fh=Math.max(7,p.w*.38);
+   const cX=tx(p.x),cY=ty(p.y);
+   return {
+    x1:tx(p.x+nx*fw),y1:ty(p.y+ny*fw),x2:tx(p.x-nx*fw),y2:ty(p.y-ny*fw),
+    bx1:tx(p.x+nx*fw+dx/l*fh),by1:ty(p.y+ny*fw+dy/l*fh),
+    bx2:tx(p.x-nx*fw+dx/l*fh),by2:ty(p.y-ny*fw+dy/l*fh),
+    cx:cX,cy:cY
+   };
+  })();
+  return {outline,center,seams,flange,viewBox:`0 0 ${Math.max(1320,(maxX-minX)*scale+pad*2)} ${Math.max(700,(maxY-minY)*scale+pad*2)}`};
  },[r,bend]);
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
@@ -135,8 +156,8 @@ export default function ToolsPage(){
    </section>
    <section className="space-y-5"><div className="grid gap-3 sm:grid-cols-4">{[["Pojemność",round(r.disp,1)+" cm³"],["Prędkość fali",round(r.wave)+" m/s"],["Długość strojona",round(r.tuned,1)+" mm"],["Dmax / D1",round(r.ratio,2)+"×"]].map(x=><div key={x[0]} className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><p className="text-xs text-zinc-500">{x[0]}</p><p className="mt-1 text-xl font-black">{x[1]}</p></div>)}</div>
     <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.035]">
-      <div className="border-b border-white/10 px-5 py-4"><div className="flex items-center justify-between"><div><h2 className="font-bold">Geometria montażowa</h2><p className="mt-1 text-xs text-zinc-500">Suwak reguluje ciasność układu; część przy cylindrze zawija się w kompaktowe U, a belly wychodzi z powrotem wzdłuż osi.</p></div><span className="font-mono text-xs text-zinc-400">{bend}°</span></div><input aria-label="Stopień wygięcia wydechu" type="range" min="0" max="90" value={Math.min(90,bend)} onChange={e=>setBend(Number(e.target.value))} className="mt-4 w-full accent-red-500"/></div>
-      <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy inspirowany typowymi komorami 2T: header przy cylindrze zawija się w U, potem profil przechodzi przez belly i wraca do przeciwstożka oraz stinger.</p></div>
+      <div className="border-b border-white/10 px-5 py-4"><div className="flex items-center justify-between"><div><h2 className="font-bold">Geometria montażowa</h2><p className="mt-1 text-xs text-zinc-500">Suwak ustawia kąt kolanka przy cylindrze. Na końcu headera jest pojedyncze kolanko, a przed nim flansza montażowa do cylindra.</p></div><span className="font-mono text-xs text-zinc-400">{bend}°</span></div><input aria-label="Stopień wygięcia wydechu" type="range" min="0" max="90" value={Math.min(90,bend)} onChange={e=>setBend(Number(e.target.value))} className="mt-4 w-full accent-red-500"/></div>
+      <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy typowej komory 2T: flansza przy cylindrze, krótki header, pojedyncze kolanko, następnie dyfuzory, belly, przeciwstożek i stinger.</p></div>
       <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
        <div className="relative min-h-[620px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
         <svg viewBox={profile.viewBox} className="h-auto min-h-[620px] w-full" role="img" aria-label="Dwuwymiarowy schemat komory rezonansowej 2T">
@@ -148,6 +169,9 @@ export default function ToolsPage(){
          <rect width="100%" height="100%" fill="#070707"/>
          <polyline points={profile.outline} fill="url(#pipeMetal)" stroke="#080808" strokeWidth="3" strokeLinejoin="round" filter="url(#pipeShadow)"/>
          <polyline points={profile.outline} fill="none" stroke="#d9dadd" strokeOpacity=".22" strokeWidth="1.2"/>
+         <line x1={profile.flange.x1} y1={profile.flange.y1} x2={profile.flange.x2} y2={profile.flange.y2} stroke="#b9bcc1" strokeWidth="7" strokeLinecap="round"/>
+         <line x1={profile.flange.bx1} y1={profile.flange.by1} x2={profile.flange.bx2} y2={profile.flange.by2} stroke="#55585d" strokeWidth="5" strokeLinecap="round"/>
+         <circle cx={profile.flange.cx} cy={profile.flange.cy} r="4" fill="#111"/>
          <polyline points={profile.center} fill="none" stroke="#fff" strokeOpacity=".14" strokeDasharray="5 7" strokeWidth="1"/>
          {profile.seams.map((s,n)=><line key={n} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke="#050505" strokeOpacity=".65" strokeWidth="2"/>)}
          <text x="42" y="34" fill="#777" fontSize="12" fontFamily="system-ui" letterSpacing="2">2T EXPANSION CHAMBER</text>
@@ -155,10 +179,10 @@ export default function ToolsPage(){
         </svg>
         <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
-         <p className="mt-1 text-xs text-zinc-300">U-bend: {Math.min(90,bend)}° · LPM: {Math.round(r.total)} mm</p>
+         <p className="mt-1 text-xs text-zinc-300">Kolanko: {Math.min(90,bend)}° · LPM: {Math.round(r.total)} mm</p>
         </div>
        </div>
-      </div>    </div><div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Wymiary do wykonania</h2><p className="mt-1 text-xs text-zinc-500">Cięciwa zmienia się wraz z wygięciem — przy 0° jest równa długości osi, a przy 90° pokazuje wymiar wynikający z łuku sekcji.</p><div className="mt-4 overflow-hidden rounded-2xl border border-white/10"><table className="w-full text-sm"><thead className="bg-white/[.04] text-xs text-zinc-500"><tr><th className="px-3 py-3 text-left">Sekcja</th><th className="px-3 py-3 text-right">Łuk osi</th><th className="px-3 py-3 text-right">Cięciwa</th><th className="px-3 py-3 text-right">Ø pocz.</th><th className="px-3 py-3 text-right">Ø końc.</th></tr></thead><tbody>{seg.map(s=>{const bendRad=rad(Math.min(90,Math.max(0,bend))); const theta=bendRad*Number(s[1])/Math.max(r.total,1); const chord=theta<.0001?Number(s[1]):2*(r.total/Math.max(bendRad,.0001))*Math.sin(theta/2);return <tr key={String(s[0])} className="border-t border-white/10"><td className="px-3 py-3 font-medium">{s[0]}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[1]))} mm</td><td className="px-3 py-3 text-right font-mono">{round(chord)} mm</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[2]))}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[3]))}</td></tr>})}</tbody></table></div></div>
+      </div>    </div><div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Wymiary do wykonania</h2><p className="mt-1 text-xs text-zinc-500">Łuk kolanka jest pokazany w wizualizacji; tabela podaje długości osiowe sekcji komory.</p><div className="mt-4 overflow-hidden rounded-2xl border border-white/10"><table className="w-full text-sm"><thead className="bg-white/[.04] text-xs text-zinc-500"><tr><th className="px-3 py-3 text-left">Sekcja</th><th className="px-3 py-3 text-right">Łuk osi</th><th className="px-3 py-3 text-right">Cięciwa</th><th className="px-3 py-3 text-right">Ø pocz.</th><th className="px-3 py-3 text-right">Ø końc.</th></tr></thead><tbody>{seg.map(s=>{const bendRad=rad(Math.min(90,Math.max(0,bend))); const theta=bendRad*Number(s[1])/Math.max(r.total,1); const chord=theta<.0001?Number(s[1]):2*(r.total/Math.max(bendRad,.0001))*Math.sin(theta/2);return <tr key={String(s[0])} className="border-t border-white/10"><td className="px-3 py-3 font-medium">{s[0]}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[1]))} mm</td><td className="px-3 py-3 text-right font-mono">{round(chord)} mm</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[2]))}</td><td className="px-3 py-3 text-right font-mono">{round(Number(s[3]))}</td></tr>})}</tbody></table></div></div>
      <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Kontrola</h2><div className="mt-4 space-y-3 text-sm"><div className="flex justify-between"><span className="text-zinc-500">Długość strojenia</span><b>{round(r.tuned)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Rura wlotowa</span><b>{round(r.header)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Stinger</span><b>Ø {round(r.stinger)} × {round(r.stingerLength)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">EGT</span><b>{round(i.egt)}°C</b></div></div><div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/[.06] p-4 text-xs leading-5 text-zinc-300"><b className="text-white">Ważne:</b> to model akustyczny i proporcjonalny punktu startowego. Port timing, temperatura, kształt kanału, króciec, tłumik i straty przepływu zmieniają rzeczywisty wynik.</div></div></div>
     <div className="rounded-3xl border border-white/10 bg-black/20 p-5"><h2 className="font-bold">Model i założenia</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Długość akustyczna korzysta z przedziału od otwarcia portu do docelowego powrotu fali. Prędkość fali jest przybliżana przez a = √(γRT). Geometria stożków, belly i stinger są parametryczne, dlatego wynik jest punktem startowym do dalszego strojenia.</p><p className="mt-3 text-xs text-zinc-600">Model nie jest pełną symulacją 1D gas-dynamics: temperatura wzdłuż układu, straty, korekta efektywnej długości, tłumik i dokładny kształt portu wymagają dalszej walidacji.</p></div>
    </section>
