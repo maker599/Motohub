@@ -13,15 +13,23 @@ function calc(i:Inputs){
  const disp=Math.PI/4*bore*bore*stroke/1000,sweptL=disp/1000,T=i.airTemp+273.15,R=287.05;
  const rho=Math.max(.2,(i.pressure*100)/(R*T)),sound=Math.sqrt(1.4*R*T),meanPiston=2*stroke*rpm/60/1000;
  const carbArea=Math.PI*Math.pow(Math.max(1,i.carb)/2,2),carbFlowIndex=carbArea*Math.sqrt(rho),carbVelocityIndex=(sweptL*rpm/120)/(carbArea/1e-6);
- const portTime=(360-i.portDuration)/360,pulseHz=rpm/120,reedLoading=i.reedArea>0?(sweptL*rpm/120)/(i.reedArea/1e-6):0;
+ const pulseHz=rpm/120,reedLoading=i.reedArea>0?(sweptL*rpm/120)/(i.reedArea/1e-6):0;
  const intakeWave=(sound/(4*Math.max(20,i.intakeLength)/1000))/pulseHz,exhaustDemand=i.exhaustArea>0?(sweptL*rpm/120)/(i.exhaustArea/1e-6):0;
  const densityPct=(rho/1.204)*100,pressureFactor=i.pressure/1013.25,airMassIndex=densityPct*pressureFactor;
- const exhaustBonus={stock:0,sport:.06,race:.11}[i.exhaustProfile];
- const volumetricEfficiency=clamp(.48 + Math.min(.24,carbFlowIndex/12000)+Math.min(.14,Math.max(0,1-Math.abs(9000-rpm)/9000)*.14)+Math.min(.08,i.exhaustArea/900*.08)+exhaustBonus,.35,.98);
- const imep=clamp(5.0+volumetricEfficiency*4.4,5.2,9.3);
- const torqueNm=imep*1e5*(disp/1e6)/(4*Math.PI);
- const powerKw=torqueNm*rpm*2*Math.PI/60/1000;
- return {disp,rho,sound,meanPiston,carbArea,carbFlowIndex,carbVelocityIndex,portTime,pulseHz,reedLoading,intakeWave,exhaustDemand,densityPct,pressureFactor,airMassIndex,volumetricEfficiency,imep,torqueNm,powerKw,powerHp:powerKw*1.35962};
+ const rpmBand=clamp(1-Math.abs(rpm-10500)/6500,.55,1);
+ const carbFactor=clamp(0.92+Math.min(.12,Math.max(0,carbFlowIndex-4)/60),.88,1.04);
+ const airFactor=clamp(.94+Math.min(.08,(airMassIndex-85)/250),.88,1.02);
+ const exhaustBase={stock:.175,sport:.235,race:.285}[i.exhaustProfile];
+ const exhaustPeak={stock:7500,sport:9500,race:11500}[i.exhaustProfile];
+ const exhaustWidth={stock:6500,sport:5200,race:4200}[i.exhaustProfile];
+ const exhaustFactor=clamp(1-(Math.abs(rpm-exhaustPeak)/exhaustWidth)*.12,.86,1);
+ const sizeFactor=clamp(Math.pow(disp/125,.18),.72,1.12);
+ const powerHp=disp*exhaustBase*rpmBand*carbFactor*airFactor*exhaustFactor*sizeFactor;
+ const torqueNm=powerHp*745.7/(rpm*2*Math.PI/60);
+ const powerKw=powerHp/1.35962;
+ const volumetricEfficiency=clamp(.58+(powerHp/disp)*.55,.42,.96);
+ const imep=clamp(torqueNm*4*Math.PI/(disp/1e6*1e5),4.8,12.5);
+ return {disp,rho,sound,meanPiston,carbArea,carbFlowIndex,carbVelocityIndex,pulseHz,reedLoading,intakeWave,exhaustDemand,densityPct,pressureFactor,airMassIndex,volumetricEfficiency,imep,torqueNm,powerKw,powerHp};
 }
 function Meter({value,min,max,label}:{value:number;min:number;max:number;label:string}){const p=clamp((value-min)/(max-min)*100,0,100);return <div><div className="mb-1 flex justify-between text-xs text-zinc-400"><span>{label}</span><span>{n(value,1)}</span></div><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-red-500" style={{width:p+"%"}}/></div></div>}
 
