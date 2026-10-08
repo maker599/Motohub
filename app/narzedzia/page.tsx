@@ -25,11 +25,12 @@ const conePattern=(length:number,d1:number,d2:number)=>{
  const outer=slant*r2/d,inner=slant*r1/d,angle=2*Math.PI*d/slant*180/Math.PI;
  return {kind:"cone",slant,outer,inner,angle,flatLength:slant,flatWidth:angle/360*2*Math.PI*outer};
 };
-const label=(a:string,u:string)=><span className="mb-2 flex items-center justify-between text-xs font-medium text-zinc-400"><span>{a}</span><span className="text-zinc-600">{u}</span></span>;
+const label=(a:string,u:string,tip?:string)=><span className="mb-2 flex items-center justify-between text-xs font-medium text-zinc-400"><span className="flex items-center gap-1.5">{a}{tip&&<span title={tip} aria-label={tip} className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-white/15 text-[9px] font-bold text-zinc-500 hover:border-red-500/50 hover:text-red-400">?</span>}</span><span className="text-zinc-600">{u}</span></span>;
 
 export default function ToolsPage(){
  const [i,setI]=useState(defaults);
  const [bend,setBend]=useState(0);
+ const [bend2,setBend2]=useState(0);
  const set=(k:keyof Inputs,v:string)=>setI(x=>({...x,[k]:v===""?0:Number(v)}));
  const r=useMemo(()=>{
   const wave=Math.sqrt(Math.max(.1,i.gamma)*287*(i.egt+273.15));
@@ -81,10 +82,15 @@ export default function ToolsPage(){
   // Typical 2T packaging: cylinder flange -> short header -> one exhaust elbow -> chamber.
   // No U-bend: the elbow only changes the direction of the pipe once.
   const elbowAngle=rad(Math.min(180,Math.max(0,bend)));
-  const elbowLen=Math.min(total*.18,Math.max(55,total*.12));
+  const elbowAngle2=rad(Math.min(180,Math.max(0,bend2)));
+  const elbowLen=Math.min(total*.12,Math.max(45,total*.08));
+  const elbowLen2=Math.min(total*.12,Math.max(45,total*.08));
   const elbowRadius=Math.max(35,elbowLen/Math.max(elbowAngle,.35));
-  const headerLen=Math.max(45,r.header*.55);
-  const chamberStart=headerLen+elbowLen;
+  const elbowRadius2=Math.max(35,elbowLen2/Math.max(elbowAngle2,.35));
+  const headerLen=Math.max(45,r.header*.45);
+  const firstEnd=headerLen+elbowLen;
+  const secondEnd=firstEnd+elbowLen2;
+  const chamberStart=secondEnd;
   const bodyLen=Math.max(1,total-chamberStart);
 
   for(let k=0;k<=n;k++){
@@ -92,19 +98,33 @@ export default function ToolsPage(){
    let x:number,y:number,tx:number,ty:number;
    if(s<=headerLen){
     x=s;y=0;tx=1;ty=0;
-   }else if(s<=chamberStart){
+   }else if(s<=firstEnd){
     const q=(s-headerLen)/Math.max(elbowLen,1);
     const a=elbowAngle*q;
     x=headerLen+elbowRadius*Math.sin(a);
     y=-elbowRadius*(1-Math.cos(a));
     tx=Math.cos(a);ty=-Math.sin(a);
+   }else if(s<=secondEnd){
+    const q=(s-firstEnd)/Math.max(elbowLen2,1);
+    const a=elbowAngle*q;
+    const b=elbowAngle2*q;
+    const ex=headerLen+elbowRadius*Math.sin(elbowAngle);
+    const ey=-elbowRadius*(1-Math.cos(elbowAngle));
+    const dirX=Math.cos(elbowAngle),dirY=-Math.sin(elbowAngle);
+    x=ex+elbowRadius2*(Math.sin(b))*dirX+elbowRadius2*(1-Math.cos(b))*dirY;
+    y=ey+elbowRadius2*(Math.sin(b))*dirY-elbowRadius2*(1-Math.cos(b))*dirX;
+    const tangentAngle=elbowAngle+elbowAngle2*q;
+    tx=Math.cos(tangentAngle);ty=-Math.sin(tangentAngle);
    }else{
     const q=(s-chamberStart)/bodyLen;
     const ex=headerLen+elbowRadius*Math.sin(elbowAngle);
     const ey=-elbowRadius*(1-Math.cos(elbowAngle));
-    x=ex+bodyLen*q*Math.cos(elbowAngle);
-    y=ey-bodyLen*q*Math.sin(elbowAngle);
-    tx=Math.cos(elbowAngle);ty=-Math.sin(elbowAngle);
+    const endX=ex+elbowRadius2*Math.sin(elbowAngle2)*Math.cos(elbowAngle)+elbowRadius2*(1-Math.cos(elbowAngle2))*(-Math.sin(elbowAngle));
+    const endY=ey+elbowRadius2*Math.sin(elbowAngle2)*(-Math.sin(elbowAngle))-elbowRadius2*(1-Math.cos(elbowAngle2))*Math.cos(elbowAngle);
+    const finalAngle=elbowAngle+elbowAngle2;
+    x=endX+bodyLen*q*Math.cos(finalAngle);
+    y=endY-bodyLen*q*Math.sin(finalAngle);
+    tx=Math.cos(finalAngle);ty=-Math.sin(finalAngle);
    }
    pts.push({x,y,w:widthAt(s),s});
   }
@@ -147,7 +167,7 @@ export default function ToolsPage(){
    };
   })();
   return {outline,center,seams,flange,viewBox:`0 0 ${Math.max(1320,(maxX-minX)*scale+pad*2)} ${Math.max(700,(maxY-minY)*scale+pad*2)}`};
- },[r,bend]);
+ },[r,bend,bend2]);
  return <main className="min-h-screen bg-[#090909] text-white"><div className="mx-auto max-w-7xl px-5 py-5 lg:px-8"><SiteNav/>
   <div className="mt-8"><Link href="/" className="text-sm text-zinc-500 hover:text-white">← MotoHub</Link>
    <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.3em] text-red-500">MotoHub / Narzędzia</p><h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">2T Exhaust Lab</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">Zaawansowany kalkulator geometrii komory rezonansowej 2T. Długość strojoną liczy z czasu otwarcia portu, temperatury gazów i obrotów docelowych, a następnie rozkłada ją na sekcje stożkowe.</p></div><div className="rounded-2xl border border-amber-500/20 bg-amber-500/[.06] px-4 py-3 text-xs leading-5 text-amber-200"><b>Projekt wstępny</b><br/>Nie zastępuje pomiarów i testów na hamowni.</div></div>
@@ -155,27 +175,40 @@ export default function ToolsPage(){
   <div className="mt-8 grid gap-5 xl:grid-cols-[360px_1fr]">
    <section className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><div className="flex items-center justify-between"><div><h2 className="font-bold">Parametry silnika</h2><p className="mt-1 text-xs text-zinc-500">Najlepiej wpisywać wartości zmierzone.</p></div><button onClick={()=>setI(defaults)} className="text-xs text-zinc-500 hover:text-white">Reset</button></div>
     <div className="mt-5 space-y-4">
-     <label>{label("Średnica cylindra","mm")}<input type="number" value={i.bore || ""} onChange={e=>set("bore",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
-     <label>{label("Skok tłoka","mm")}<input type="number" value={i.stroke || ""} onChange={e=>set("stroke",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
-     <label>{label("Liczba cylindrów","szt.")}<input type="number" value={i.cylinders || ""} onChange={e=>set("cylinders",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
-     <label>{label("Obroty szczytu mocy","rpm")}<input type="number" value={i.rpm || ""} onChange={e=>set("rpm",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
-     <div className="grid grid-cols-2 gap-3"><label>{label("Otwarcie wydechu","° CA")}<input type="number" value={i.exhaustOpen || ""} onChange={e=>set("exhaustOpen",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none"/></label><label>{label("Zamknięcie","° CA")}<input type="number" value={i.exhaustClose || ""} onChange={e=>set("exhaustClose",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label></div>
-     <label>{label("Docelowy powrót fali","° CA")}<input type="number" value={i.targetReturn || ""} onChange={e=>set("targetReturn",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label>
-     <div className="grid grid-cols-2 gap-3"><label>{label("Śr. portu","mm")}<input type="number" step=".1" value={i.exhaustPortDiameter || ""} onChange={e=>set("exhaustPortDiameter",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white" /></label><label>{label("Wysokość portu","mm")}<input type="number" step=".1" value={i.exhaustPortHeight || ""} onChange={e=>set("exhaustPortHeight",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white" /></label></div>
-     <label>{label("Średnica headera","mm")}<input type="number" step=".1" value={i.headerDiameter || ""} onChange={e=>set("headerDiameter",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white" /></label>
-     <div className="grid grid-cols-2 gap-3"><label>{label("EGT","°C")}<input type="number" value={i.egt || ""} onChange={e=>set("egt",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label><label>{label("Wykładnik γ","–")}<input type="number" step=".01" value={i.gamma || ""} onChange={e=>set("gamma",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label></div>
-     <div className="border-t border-white/10 pt-4"><p className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">Geometria stożków</p><div className="grid grid-cols-3 gap-2"><label>{label("D1","°")}<input type="number" step=".1" value={i.diffuser1 || ""} onChange={e=>set("diffuser1",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label><label>{label("D2","°")}<input type="number" step=".1" value={i.diffuser2 || ""} onChange={e=>set("diffuser2",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label><label>{label("D3","°")}<input type="number" step=".1" value={i.diffuser3 || ""} onChange={e=>set("diffuser3",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label></div><div className="mt-3 grid grid-cols-2 gap-3"><label>{label("Kąt przeciwstożka","°")}<input type="number" step=".1" value={i.baffleAngle || ""} onChange={e=>set("baffleAngle",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label><label>{label("Belly / header","×")}<input type="number" step=".05" value={i.bellyRatio || ""} onChange={e=>set("bellyRatio",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label></div>
-     <div className="mt-3 grid grid-cols-2 gap-3"><label>{label("Stinger / Dmax","×")}<input type="number" step=".01" value={i.stingerRatio || ""} onChange={e=>set("stingerRatio",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label><label>{label("Stinger / Ø","×")}<input type="number" step=".5" value={i.stingerLengthRatio || ""} onChange={e=>set("stingerLengthRatio",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label></div>
-     <div className="mt-3 grid grid-cols-2 gap-3"><label>{label("Rdzeń tłumika","mm")}<input type="number" step=".5" value={i.silencerCore || ""} onChange={e=>set("silencerCore",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label><label>{label("Ścianka","mm")}<input type="number" step=".1" value={i.wall || ""} onChange={e=>set("wall",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label></div></div>
+     <label>{label("Średnica cylindra","mm","Średnica tłoka/cylindra. Zmierz średnicówką lub suwmiarką w cylindrze, najlepiej w kilku kierunkach i wysokościach.")}<input type="number" value={i.bore || ""} onChange={e=>set("bore",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <label>{label("Skok tłoka","mm","Odległość, jaką tłok pokonuje między GMP i DMP. Zmierz lub odczytaj ze specyfikacji silnika.")}<input type="number" value={i.stroke || ""} onChange={e=>set("stroke",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <label>{label("Liczba cylindrów","szt.","Liczba cylindrów silnika. Wpisz 1 dla singla, 2 dla dwucylindrowego itd.")}<input type="number" value={i.cylinders || ""} onChange={e=>set("cylinders",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <label>{label("Obroty szczytu mocy","rpm","Docelowe obroty, przy których chcesz uzyskać szczyt działania komory. Najlepiej z wykresu hamowni.")}<input type="number" value={i.rpm || ""} onChange={e=>set("rpm",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none focus:border-red-500/60"/></label>
+     <div className="grid grid-cols-2 gap-3"><label>{label("Otwarcie wydechu","° CA","Kąt otwarcia okna wydechowego mierzony względem położenia wału. Najpewniej sprawdzić czujnikiem zegarowym i tarczą stopniową.")}<input type="number" value={i.exhaustOpen || ""} onChange={e=>set("exhaustOpen",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none"/></label><label>{label("Zamknięcie","° CA","Kąt, przy którym okno wydechowe się zamyka. Mierz tak samo jak otwarcie, obracając wał i zaznaczając moment zasłonięcia okna.")}<input type="number" value={i.exhaustClose || ""} onChange={e=>set("exhaustClose",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label></div>
+     <label>{label("Docelowy powrót fali","° CA","Docelowy moment, w którym odbita fala ma wrócić do cylindra. To parametr strojenia modelu, a nie bezpośredni wymiar blachy.")}<input type="number" value={i.targetReturn || ""} onChange={e=>set("targetReturn",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label>
+     <div className="grid grid-cols-2 gap-3"><label>{label("Śr. portu","mm","Przybliżona średnica zastępcza kanału/wyjścia wydechowego. Zmierz szerokość i wysokość okna, jeśli ma nieregularny kształt, i traktuj wynik jako średnicę zastępczą.")}<input type="number" step=".1" value={i.exhaustPortDiameter || ""} onChange={e=>set("exhaustPortDiameter",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white" /></label><label>{label("Wysokość portu","mm","Wysokość okna wydechowego. Zmierz od górnej do dolnej krawędzi okna w osi cylindra.")}<input type="number" step=".1" value={i.exhaustPortHeight || ""} onChange={e=>set("exhaustPortHeight",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white" /></label></div>
+     <label>{label("Średnica headera","mm","Średnica wewnętrzna rury tuż za flanszą/wyjściem z cylindra. Zmierz średnicę wewnętrzną suwmiarką.")}<input type="number" step=".1" value={i.headerDiameter || ""} onChange={e=>set("headerDiameter",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white" /></label>
+     <div className="grid grid-cols-2 gap-3"><label>{label("EGT","°C","Temperatura gazów spalinowych używana do przybliżenia prędkości fali. W praktyce korzystaj z pomiaru EGT w znanym miejscu układu.")}<input type="number" value={i.egt || ""} onChange={e=>set("egt",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label><label>{label("Wykładnik γ","–","Wykładnik adiabaty gazu używany w uproszczonym modelu prędkości dźwięku. Dla dokładniejszych obliczeń powinien wynikać z przyjętego modelu gazu i temperatury.")}<input type="number" step=".01" value={i.gamma || ""} onChange={e=>set("gamma",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-white outline-none" /></label></div>
+     <div className="border-t border-white/10 pt-4"><p className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">Geometria stożków</p><div className="grid grid-cols-3 gap-2"><label>{label("D1","°","Kąt rozwarcia pierwszego dyfuzora. Mierz kąt zawarty stożka, nie kąt jednej ścianki względem osi.")}<input type="number" step=".1" value={i.diffuser1 || ""} onChange={e=>set("diffuser1",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label><label>{label("D2","°","Kąt rozwarcia drugiego dyfuzora. Ustaw na podstawie geometrii, którą chcesz wykonać i zmierz pełny kąt stożka.")}<input type="number" step=".1" value={i.diffuser2 || ""} onChange={e=>set("diffuser2",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label><label>{label("D3","°","Kąt rozwarcia trzeciego dyfuzora. Jest to pełny kąt zawarty danego odcinka stożkowego.")}<input type="number" step=".1" value={i.diffuser3 || ""} onChange={e=>set("diffuser3",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white"/></label></div><div className="mt-3 grid grid-cols-2 gap-3"><label>{label("Kąt przeciwstożka","°","Pełny kąt zawarty przeciwstożka. Zbyt duży kąt może pogarszać zachowanie odbicia i przepływ, dlatego traktuj go jako parametr strojenia.")}<input type="number" step=".1" value={i.baffleAngle || ""} onChange={e=>set("baffleAngle",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label><label>{label("Belly / header","×","Stosunek średnicy maksymalnej belly do średnicy headera. Nie jest to wymiar do zmierzenia jednym przyrządem — wynika z obu średnic.")}<input type="number" step=".05" value={i.bellyRatio || ""} onChange={e=>set("bellyRatio",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label></div>
+     <div className="mt-3 grid grid-cols-2 gap-3"><label>{label("Stinger / Dmax","×","Stosunek średnicy stinger'a do maksymalnej średnicy komory. Zmierz oba wewnętrzne średnice i podziel Dstinger przez Dmax.")}<input type="number" step=".01" value={i.stingerRatio || ""} onChange={e=>set("stingerRatio",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label><label>{label("Stinger / Ø","×","Długość stinger'a wyrażona jako wielokrotność jego średnicy. Zmierz długość osiową stinger'a i podziel przez jego średnicę.")}<input type="number" step=".5" value={i.stingerLengthRatio || ""} onChange={e=>set("stingerLengthRatio",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label></div>
+     <div className="mt-3 grid grid-cols-2 gap-3"><label>{label("Rdzeń tłumika","mm","Średnica rdzenia perforowanego tłumika. Zmierz zewnętrzną średnicę rdzenia przed owinięciem materiałem tłumiącym.")}<input type="number" step=".5" value={i.silencerCore || ""} onChange={e=>set("silencerCore",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label><label>{label("Ścianka","mm","Grubość blachy, z której wykonujesz elementy komory. Zmierz mikrometrem lub sprawdź deklarowaną grubość materiału.")}<input type="number" step=".1" value={i.wall || ""} onChange={e=>set("wall",e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-white" /></label></div></div>
     </div>
    </section>
    <section className="space-y-5"><div className="grid gap-3 sm:grid-cols-4">{[["Pojemność",round(r.disp,1)+" cm³"],["Prędkość fali",round(r.wave)+" m/s"],["Długość strojona",round(r.tuned,1)+" mm"],["Dmax / D1",round(r.ratio,2)+"×"]].map(x=><div key={x[0]} className="rounded-2xl border border-white/10 bg-white/[.035] p-4"><p className="text-xs text-zinc-500">{x[0]}</p><p className="mt-1 text-xl font-black">{x[1]}</p></div>)}</div>
     <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.035]">
-      <div className="border-b border-white/10 px-5 py-4"><div className="flex items-center justify-between"><div><h2 className="font-bold">Geometria montażowa</h2><p className="mt-1 text-xs text-zinc-500">Suwak ustawia kąt kolanka przy cylindrze: od prostego wyjścia do pełnego zawinięcia 180°, dzięki czemu można uzyskać kształt C lub U. Na końcu headera jest flansza montażowa do cylindra.</p></div><span className="font-mono text-xs text-zinc-400">{bend}°</span></div><div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4">
-       <div className="flex items-center justify-between"><span className="text-[10px] font-black uppercase tracking-[.18em] text-zinc-500">Kąt kolanka</span><span className="font-mono text-lg font-black text-white">{Math.min(180,bend)}°</span></div>
-       <input aria-label="Stopień wygięcia kolanka" type="range" min="0" max="180" value={Math.min(180,bend)} onChange={e=>setBend(Number(e.target.value))} className="mt-3 w-full accent-red-500"/>
-       <div className="mt-2 flex justify-between text-[10px] text-zinc-600"><span>0° prosto</span><span>90° C</span><span>180° U</span></div>
-      </div></div>
+      <div className="border-b border-white/10 px-5 py-5">
+       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div><p className="text-[10px] font-black uppercase tracking-[.2em] text-red-400">Pakowanie wydechu</p><h2 className="mt-1 font-bold">Geometria kolanek</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">Dwa niezależne kąty pozwalają ustawić kierunek pierwszego i drugiego odcinka. Dzięki temu łatwiej zaplanować przejście obok ramy, wahacza lub pod siedzeniem.</p></div>
+        <div className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2 text-right"><p className="text-[9px] uppercase tracking-widest text-zinc-600">Łączna zmiana kierunku</p><p className="font-mono text-lg font-black">{Math.min(180,bend)}° + {Math.min(180,bend2)}°</p></div>
+       </div>
+       <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+         <div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Kolanko 1</p><p className="mt-1 text-sm font-semibold">Wyjście od cylindra</p></div><span className="rounded-lg bg-white/[.06] px-2 py-1 font-mono text-lg font-black">{Math.min(180,bend)}°</span></div>
+         <input aria-label="Kąt pierwszego kolanka" type="range" min="0" max="180" value={Math.min(180,bend)} onChange={e=>setBend(Number(e.target.value))} className="mt-4 w-full accent-red-500"/>
+         <div className="mt-2 flex justify-between text-[10px] text-zinc-600"><span>0° prosto</span><span>90°</span><span>180° zawinięcie</span></div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+         <div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Kolanko 2</p><p className="mt-1 text-sm font-semibold">Druga zmiana kierunku</p></div><span className="rounded-lg bg-white/[.06] px-2 py-1 font-mono text-lg font-black">{Math.min(180,bend2)}°</span></div>
+         <input aria-label="Kąt drugiego kolanka" type="range" min="0" max="180" value={Math.min(180,bend2)} onChange={e=>setBend2(Number(e.target.value))} className="mt-4 w-full accent-red-500"/>
+         <div className="mt-2 flex justify-between text-[10px] text-zinc-600"><span>0° prosto</span><span>90°</span><span>180° zawinięcie</span></div>
+        </div>
+       </div>
+      </div>
       <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">Podgląd 2D komory</h2><p className="mt-1 text-xs text-zinc-500">Widok warsztatowy typowej komory 2T: flansza przy cylindrze, krótki header, pojedyncze kolanko, następnie dyfuzory, belly, przeciwstożek i stinger.</p></div>
       <div className="overflow-hidden p-2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]">
        <div className="relative min-h-[620px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707]">
@@ -198,7 +231,7 @@ export default function ToolsPage(){
         </svg>
         <div className="pointer-events-none absolute right-4 top-4 rounded-xl border border-white/10 bg-black/55 px-3 py-2 backdrop-blur-sm">
          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-zinc-500">2T Chamber</p>
-         <p className="mt-1 text-xs text-zinc-300">Kolanko: {Math.min(180,bend)}° · LPM: {Math.round(r.total)} mm</p>
+         <p className="mt-1 text-xs text-zinc-300">Kolanka: {Math.min(180,bend)}° / {Math.min(180,bend2)}° · LPM: {Math.round(r.total)} mm</p>
         </div>
        </div>
       </div>    </div><div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Rozwinięcia blach do wycięcia</h2><p className="mt-1 text-xs text-zinc-500">Dla prostych sekcji pokazuję rzeczywiste wymiary rozwinięcia przed walcowaniem i stożkowaniem, a nie samą długość osiową.</p><div className="mt-4 overflow-x-auto rounded-2xl border border-white/10"><table className="w-full min-w-[760px] text-sm"><thead className="bg-white/[.04] text-[11px] text-zinc-500"><tr><th className="px-3 py-3 text-left">Detal</th><th className="px-3 py-3 text-left">Typ rozwinięcia</th><th className="px-3 py-3 text-right">Dł. osiowa</th><th className="px-3 py-3 text-right">Szer. blachy</th><th className="px-3 py-3 text-right">D1</th><th className="px-3 py-3 text-right">D2</th><th className="px-3 py-3 text-right">Skos / kąt</th></tr></thead><tbody>
