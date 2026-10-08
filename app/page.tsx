@@ -1,5 +1,5 @@
 import Link from "next/link";
-import AuthNav from "./AuthNav";
+import SiteNav from "./SiteNav";
 
 const features = [
   { title: "Znajdź motocykl", text: "Przeglądaj motocykle i odkrywaj modele dopasowane do Twoich zainteresowań.", href: "/motocykle" },
@@ -13,19 +13,7 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_25%,rgba(239,68,68,0.16),transparent_32%),radial-gradient(circle_at_20%_80%,rgba(255,255,255,0.06),transparent_28%)]" />
         <div className="relative mx-auto max-w-7xl px-6 py-6 lg:px-8">
-          <nav className="flex items-center justify-between border-b border-white/10 pb-5">
-            <Link href="/" className="text-2xl font-black tracking-tight">MOTO<span className="text-red-500">HUB</span></Link>
-
-            <div className="hidden items-center gap-8 text-sm text-zinc-300 md:flex">
-              <Link className="transition hover:text-white" href="/motocykle">Motocykle</Link>
-              <Link className="transition hover:text-white" href="/garaz">Garaż</Link>
-              <Link className="transition hover:text-white" href="/spolecznosc">Społeczność</Link>
-            </div>
-
-            <div className="flex min-w-[150px] items-center justify-end gap-3">
-              <AuthNav />
-            </div>
-          </nav>
+          <SiteNav />
 
           <div className="grid min-h-[620px] items-center gap-12 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-28">
             <div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SiteNav from "../SiteNav";
 
 const bikes = [
   { id:"yamaha-mt07", brand:"Yamaha", model:"MT-07", year:2025, engine:"689 cm³", type:"Naked", power:"73 KM" },
@@ -13,15 +14,7 @@ export default function MotorcyclesPage() {
   return (
     <main className="min-h-screen bg-[#090909] text-white">
       <div className="mx-auto max-w-7xl px-6 py-6 lg:px-8">
-        <nav className="flex items-center justify-between border-b border-white/10 pb-5">
-          <Link href="/" className="text-2xl font-black">MOTO<span className="text-red-500">HUB</span></Link>
-          <div className="flex gap-5 text-sm text-zinc-400">
-            <Link href="/motocykle" className="text-white">Motocykle</Link>
-            <Link href="/garaz">Garaż</Link>
-            <Link href="/spolecznosc">Społeczność</Link>
-          </div>
-          <Link href="/rejestracja" className="rounded-full bg-white px-4 py-2 text-sm font-bold text-black">Dołącz</Link>
-        </nav>
+        <SiteNav />
 
         <header className="py-16">
           <p className="text-sm font-bold uppercase tracking-[.25em] text-red-500">Katalog</p>
