@@ -69,10 +69,10 @@ export async function POST(request: Request) {
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        maxAge: data.expires_in ?? 3600,
+        maxAge: 60 * 60 * 24 * 30,
       });
     }
-    return result;
+    if (data.refresh_token) {\n      result.cookies.set("motohub_refresh_token", data.refresh_token, {\n        httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 30,\n      });\n    }\n    return result;
   } catch (error) {
     const message = error instanceof DOMException && error.name === "AbortError"
       ? "Supabase nie odpowiedział w ciągu 10 sekund. Sprawdź konfigurację Supabase w Vercel."
