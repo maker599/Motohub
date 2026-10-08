@@ -2,18 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function AuthNav() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [ready, setReady] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    setReady(false);
     fetch("/api/auth/me", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : { user: null })
       .then((data) => setLoggedIn(Boolean(data.user)))
       .catch(() => setLoggedIn(false))
       .finally(() => setReady(true));
-  }, []);
+  }, [pathname]);
 
   if (!ready) return <div className="h-10 w-24" aria-hidden="true" />;
 
