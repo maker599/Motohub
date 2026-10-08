@@ -91,6 +91,13 @@ const previewImages: Record<string, string> = {
   "beta-rr300": "https://betamotorcycles.co.nz/wp-content/uploads/2024/10/RR-300-X-Pro-1.png",
   "tm-en300": "https://bike.net/res/media/img/orig/ref/6bf/168474.jpg",
   "aprilia-tuareg660": "https://cdn-listino.inmoto.it/2025/3/11/Aprilia_Tuareg_660_1f0b86499a.jpg",
+  "bmw-r1300gs": "https://www.2ri.de/Images/Big/0/BMW_R1300GS_2025_76315.jpg",
+  "bmw-s1000rr": "https://www.2ri.de/Images/Big/8/News_2025-BMW-S1000RR5.jpg",
+  "triumph-streettriple": "https://images5.1000ps.net/images_bikekat/2025/37-Triumph/8883-Street_Triple_765_R/007-638874913276231594-triumph-street-triple-765-r.jpg?format=webp&height=566&mode=crop&width=920",
+  "triumph-tiger900": "https://images.motoren-toerisme.be/2023-12/2024_triumph_tiger900gtpro_01.jpg?auto=format%2Ccompres&fill=solid&fit=fill&h=880&ixlib=php-1.1.0&q=75&s=0625fb78b95aa6e25a18421dfb3f6cda&w=1320",
+  "yamaha-r3": "https://soymotero.net/wp-content/uploads/2024/10/Yamaha-YZF-R3-2025-1.jpg",
+  "yamaha-r1": "https://d1uzk9o9cg136f.cloudfront.net/f/16782548/rc/2025/03/14/8bd2842d0c1c2c66407c5afe32e311a8e998a699.jpg",
+  "honda-cb650r": "https://d1uzk9o9cg136f.cloudfront.net/f/16782548/rc/2024/12/20/e35df9a78398247a708a75dabd962751f012ca37.jpg",
 };
 
 function getPreviewImage(id: string) {
