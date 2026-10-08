@@ -227,7 +227,7 @@ export default function ToolsPage(){
           <line x1="0" y1="0" x2={profile.scaleBarPx} y2="0" stroke="#d4d4d8" strokeWidth="2"/>
           <line x1="0" y1="-6" x2="0" y2="6" stroke="#d4d4d8" strokeWidth="2"/>
           <line x1={profile.scaleBarPx} y1="-6" x2={profile.scaleBarPx} y2="6" stroke="#d4d4d8" strokeWidth="2"/>
-          <text x={profile.scaleBarPx/2} y="-10" textAnchor="middle" fill="#a1a1aa" fontSize="10" fontFamily="monospace">{round(scaleBarMm/10)} cm</text>
+          <text x={profile.scaleBarPx/2} y="-10" textAnchor="middle" fill="#a1a1aa" fontSize="10" fontFamily="monospace">{round(profile.scaleBarMm/10)} cm</text>
           <text x={profile.scaleBarPx+10} y="4" fill="#52525b" fontSize="9" fontFamily="system-ui">skala = cała długość wydechu</text>
          </g>
         </svg>
