@@ -5,6 +5,7 @@ const features = [
   { title: "Znajdź motocykl", text: "Przeglądaj motocykle i odkrywaj modele dopasowane do Twoich zainteresowań.", href: "/motocykle" },
   { title: "Twój garaż", text: "Zbieraj swoje motocykle w jednym miejscu i buduj własny wirtualny garaż.", href: "/garaz" },
   { title: "Społeczność", text: "Dziel się zajawką, poznawaj innych motocyklistów i rozmawiaj o motocyklach.", href: "/spolecznosc" },
+  { title: "Analiza cylindra", text: "Zbierz dane techniczne i uporządkuj własne pomiary w podglądzie poglądowym.", href: "/analiza-cylindra" },
 ];
 
 export default function Home() {
