@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import SiteNav from "../SiteNav";
+import SiteNav from "../../SiteNav";
 
 type Inputs = {
   bore:number; stroke:number; cylinders:number; rpm:number; exhaustOpen:number; exhaustClose:number; targetReturn:number;
