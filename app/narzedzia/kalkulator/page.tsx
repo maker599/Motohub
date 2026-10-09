@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SiteNav from "../../SiteNav";
 
 type Inputs = {
@@ -27,10 +27,23 @@ const conePattern=(length:number,d1:number,d2:number)=>{
 };
 const label=(a:string,u:string,tip?:string)=><span className="mb-2 flex items-center justify-between text-xs font-medium text-zinc-400"><span className="flex items-center gap-1.5">{a}{tip&&<span title={tip} aria-label={tip} className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-white/15 text-[9px] font-bold text-zinc-500 hover:border-red-500/50 hover:text-red-400">?</span>}</span><span className="text-zinc-600">{u}</span></span>;
 
+type CylinderRecord = { id:string; name:string; bore:number; stroke:number; portDiameter:number; portHeight:number; exhaustOpen:number; rpm:number; notes:string; savedAt:string };
+const CYLINDER_STORAGE_KEY = "motohub-2t-lab-cylinders-v1";
+
 export default function ToolsPage(){
  const [i,setI]=useState(defaults);
  const [bend,setBend]=useState(0);
  const [bend2,setBend2]=useState(0);
+ const [cylinderName,setCylinderName]=useState("");
+ const [cylinderNotes,setCylinderNotes]=useState("");
+ const [savedCylinders,setSavedCylinders]=useState<CylinderRecord[]>([]);
+ const [cylindersLoaded,setCylindersLoaded]=useState(false);
+ const [cylinderNotice,setCylinderNotice]=useState("");
+ useEffect(()=>{try{const raw=window.localStorage.getItem(CYLINDER_STORAGE_KEY);if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))setSavedCylinders(parsed.filter((x):x is CylinderRecord=>x&&typeof x.id==="string"&&typeof x.name==="string"));}}catch{setCylinderNotice("Nie udało się odczytać lokalnego katalogu cylindrów.");}setCylindersLoaded(true);},[]);
+ useEffect(()=>{if(!cylindersLoaded)return;try{window.localStorage.setItem(CYLINDER_STORAGE_KEY,JSON.stringify(savedCylinders));}catch{setCylinderNotice("Brak miejsca na zapis. Wyeksportuj lub usuń część wpisów.");}},[savedCylinders,cylindersLoaded]);
+ const saveCylinderSnapshot=()=>{if(!cylinderName.trim()){setCylinderNotice("Wpisz nazwę wariantu cylindra przed zapisem.");return;}const record:CylinderRecord={id:typeof crypto!=="undefined"&&"randomUUID" in crypto?crypto.randomUUID():String(Date.now()),name:cylinderName.trim(),bore:i.bore,stroke:i.stroke,portDiameter:i.exhaustPortDiameter,portHeight:i.exhaustPortHeight,exhaustOpen:i.exhaustOpen,rpm:i.rpm,notes:cylinderNotes.trim(),savedAt:new Date().toISOString()};setSavedCylinders(current=>[record,...current]);setCylinderNotice("Zapisano kartę cylindra wraz z aktualnymi parametrami kalkulatora.");setCylinderName("");setCylinderNotes("");};
+ const applyCylinderSnapshot=(record:CylinderRecord)=>{setI(current=>({...current,bore:record.bore,stroke:record.stroke,exhaustPortDiameter:record.portDiameter,exhaustPortHeight:record.portHeight,headerDiameter:record.portDiameter,exhaustOpen:record.exhaustOpen,rpm:record.rpm}));setCylinderNotice("Wczytano parametry zapisanej karty do 2T Exhaust Lab.");};
+ const exportCylinderCatalog=()=>{const blob=new Blob([JSON.stringify({schemaVersion:1,exportedAt:new Date().toISOString(),items:savedCylinders},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="motohub-karty-cylindrow.json";a.click();URL.revokeObjectURL(url);setCylinderNotice("Wyeksportowano lokalny katalog kart cylindrów.");};
  const set=(k:keyof Inputs,v:string)=>setI(x=>({...x,[k]:v===""?0:Number(v)}));
  const r=useMemo(()=>{
   const wave=Math.sqrt(Math.max(.1,i.gamma)*287*(i.egt+273.15));
@@ -287,6 +300,21 @@ export default function ToolsPage(){
      <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><h2 className="font-bold">Kontrola</h2><div className="mt-4 space-y-3 text-sm"><div className="flex justify-between"><span className="text-zinc-500">Długość strojenia</span><b>{round(r.tuned)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Rura wlotowa</span><b>{round(r.header)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">Stinger</span><b>Ø {round(r.stinger)} × {round(r.stingerLength)} mm</b></div><div className="flex justify-between"><span className="text-zinc-500">EGT</span><b>{round(i.egt)}°C</b></div></div><div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/[.06] p-4 text-xs leading-5 text-zinc-300"><b className="text-white">Ważne:</b> to model akustyczny i proporcjonalny punktu startowego. Port timing, temperatura, kształt kanału, króciec, tłumik i straty przepływu zmieniają rzeczywisty wynik.</div></div></div>
     <div className="rounded-3xl border border-white/10 bg-black/20 p-5"><h2 className="font-bold">Model i założenia</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Długość akustyczna jest tu traktowana jako model orientacyjny. Rzeczywista długość strojenia zależy m.in. od temperatury wzdłuż wydechu, prędkości dźwięku, korekty efektywnej długości oraz geometrii portu. Rozwinięcia blach są geometrią wykonawczą dla przyjętych wymiarów, ale nie są certyfikowanym projektem silnika.</p><p className="mt-3 text-xs text-zinc-600">Model nie jest pełną symulacją 1D gas-dynamics: temperatura wzdłuż układu, straty, korekta efektywnej długości, tłumik i dokładny kształt portu wymagają dalszej walidacji.</p></div>
    </section>
+
+  <section id="warsztat-cylindra" className="mt-8 rounded-3xl border border-red-500/20 bg-gradient-to-br from-red-500/[.07] to-white/[.02] p-5 sm:p-7">
+   <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.25em] text-red-400">Zintegrowany warsztat 2T</p><h2 className="mt-2 text-2xl font-black">Karty cylindrów i pomiary</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">Karta jest częścią kalkulatora. Zapisujesz bieżące parametry, wracasz do wariantu i wczytujesz dane bez ponownego przepisywania.</p></div><button type="button" onClick={exportCylinderCatalog} className="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/[.06]">Eksportuj karty JSON</button></div>
+   <div className="mt-5 grid gap-5 lg:grid-cols-[.9fr_1.1fr]">
+    <div className="rounded-2xl border border-white/10 bg-black/25 p-4"><h3 className="font-bold">Aktualna karta pomiarowa</h3><p className="mt-1 text-xs leading-5 text-zinc-500">Dane są pobierane z pól powyższego kalkulatora.</p>
+     <label className="mt-4 block"><span className="mb-2 block text-xs text-zinc-400">Nazwa / wariant cylindra *</span><input value={cylinderName} onChange={e=>setCylinderName(e.target.value)} placeholder="Kod części / model / rewizja" className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-sm outline-none focus:border-red-500/50"/></label>
+     <div className="mt-4 grid grid-cols-2 gap-3">{[[ "Średnica × skok",round(i.bore,2)+" × "+round(i.stroke,2)+" mm"],["Pojemność",round(r.disp,2)+" cm³"],["Port wydechowy",round(i.exhaustPortDiameter,2)+" × "+round(i.exhaustPortHeight,2)+" mm"],["Timing / obroty",round(i.exhaustOpen,1)+"° / "+round(i.rpm)+" rpm"]].map(([name,value])=><div key={name} className="rounded-xl bg-white/[.04] p-3"><span className="text-xs text-zinc-500">{name}</span><p className="mt-1 font-mono text-sm font-bold">{value}</p></div>)}</div>
+     <label className="mt-4 block"><span className="mb-2 block text-xs text-zinc-400">Notatki / źródło pomiaru</span><textarea value={cylinderNotes} onChange={e=>setCylinderNotes(e.target.value)} rows={3} placeholder="Metoda, przyrząd, dokumentacja, niepewność…" className="w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2.5 text-sm outline-none focus:border-red-500/50"/></label>
+     <button type="button" onClick={saveCylinderSnapshot} className="mt-4 w-full rounded-xl bg-red-500 px-4 py-3 text-sm font-bold hover:bg-red-400">Zapisz kartę z aktualnych parametrów</button>{cylinderNotice&&<p role="status" className="mt-3 text-xs leading-5 text-zinc-300">{cylinderNotice}</p>}
+    </div>
+    <div className="rounded-2xl border border-white/10 bg-black/25 p-4"><div className="flex items-center justify-between gap-3"><div><h3 className="font-bold">Katalog zapisanych cylindrów</h3><p className="mt-1 text-xs text-zinc-500">{savedCylinders.length} zapisanych kart · lokalnie w tej przeglądarce</p></div><span className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400">2T Lab</span></div>
+     {savedCylinders.length===0?<div className="mt-4 rounded-xl border border-dashed border-white/10 p-6 text-center"><p className="font-semibold">Brak zapisanych kart</p><p className="mt-2 text-xs leading-5 text-zinc-500">Uzupełnij parametry i zapisz pierwszą kartę. Nie dodajemy zmyślonych specyfikacji producentów.</p></div>:<div className="mt-4 space-y-3">{savedCylinders.map(record=><article key={record.id} className="rounded-xl border border-white/10 bg-white/[.025] p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h4 className="font-bold">{record.name}</h4><p className="mt-1 text-xs text-zinc-500">{new Date(record.savedAt).toLocaleString("pl-PL")}</p><p className="mt-2 font-mono text-xs text-zinc-300">{record.bore} × {record.stroke} mm · {round(Math.PI/4*record.bore*record.bore*record.stroke/1000,2)} cm³ · port {record.portDiameter} × {record.portHeight} mm</p>{record.notes&&<p className="mt-2 text-xs leading-5 text-zinc-400">{record.notes}</p>}</div><div className="flex gap-2"><button type="button" onClick={()=>applyCylinderSnapshot(record)} className="rounded-full bg-white px-3 py-2 text-xs font-bold text-black">Wczytaj</button><button type="button" onClick={()=>setSavedCylinders(items=>items.filter(item=>item.id!==record.id))} className="rounded-full border border-white/10 px-3 py-2 text-xs text-zinc-400 hover:text-red-300">Usuń</button></div></div></article>)}</div>}
+    </div>
+   </div><p className="mt-4 text-xs leading-5 text-zinc-600">Dane zapisuje localStorage tej przeglądarki; eksport JSON tworzy kopię zapasową. Wpisy użytkownika nie są automatycznie zweryfikowaną specyfikacją. Przed obróbką sprawdź je z dokumentacją producenta i specjalistą.</p>
+  </section>
 
   <section className="mt-8 grid gap-4 md:grid-cols-2">
    <Link href="/narzedzia/tuning-2t" className="group rounded-3xl border border-red-500/20 bg-red-500/[.06] p-5 transition hover:border-red-500/40 hover:bg-red-500/[.09]">
