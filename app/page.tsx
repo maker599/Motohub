@@ -5,8 +5,8 @@ const features = [
   { title: "Znajdź motocykl", text: "Przeglądaj motocykle i odkrywaj modele dopasowane do Twoich zainteresowań.", href: "/motocykle" },
   { title: "Twój garaż", text: "Zbieraj swoje motocykle w jednym miejscu i buduj własny wirtualny garaż.", href: "/garaz" },
   { title: "Społeczność", text: "Dziel się zajawką, poznawaj innych motocyklistów i rozmawiaj o motocyklach.", href: "/spolecznosc" },
-  { title: "Analiza cylindra", text: "Zbierz dane techniczne i uporządkuj własne pomiary w podglądzie poglądowym.", href: "/analiza-cylindra" },
-  { title: "Katalog cylindrów", text: "Buduj katalog wariantów, zapisuj źródła i przenoś dane części do karty pomiarów.", href: "/katalog-cylindrow" },
+  { title: "2T Exhaust Lab", text: "Projektuj i porównuj geometrię komory rezonansowej 2T, rozwinięcia stożków i zapisane karty cylindrów.", href: "/narzedzia/kalkulator" },
+  { title: "Tuning 2T", text: "Analizuj pojemność, prędkość tłoka, czasy portów, sprężanie i warunki otoczenia.", href: "/narzedzia/tuning-2t" },
 ];
 
 export default function Home() {
