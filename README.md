@@ -34,3 +34,25 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## Uruchomienie lokalne
+
+Wymagania: Node.js 22 lub nowszy oraz npm.
+
+```bash
+npm ci
+npm run dev
+```
+
+Następnie otwórz http://localhost:3000.
+
+## Kontrola i kompilacja produkcyjna
+
+```bash
+npm run lint
+npm run build
+npm start
+```
+
+Projekt zawiera workflow GitHub Actions w `.github/workflows/build.yml`, który uruchamia lint i build przy zmianach na gałęzi `main` oraz przy pull requestach.
