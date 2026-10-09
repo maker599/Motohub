@@ -4,6 +4,7 @@ import SiteNav from "../SiteNav";
 const modules = [
   { href: "/narzedzia/tuning-2t", tag: "SYMULATOR", title: "Moc i obroty 2T", desc: "Parametry cylindra, przykładowe presety AM6, Derbi, skuterów i Simsona oraz model porównawczy mocy." },
   { href: "/narzedzia/setupy-2t", tag: "BAZA", title: "Baza setupów 2T", desc: "Platformy AM6, Derbi D50B0, Piaggio Hi-Per2, Minarelli poziomy i Simson; przykładowe części oraz kontrola kompatybilności." },
+  { href: "/narzedzia/porting-lab", tag: "LAB 2T", title: "Porting Lab", desc: "Wybierz silnik, klasę cylindra i cel projektu. Wizualizacja kanałów, kierunek prac oraz checklista pomiarowa — bez zgadywania wymiarów." },
   { href: "/narzedzia/kalkulator", tag: "KALKULATOR", title: "Kalkulator wydechu", desc: "Projekt geometrii komory rezonansowej, wymiary sekcji i eksport rysunku do wydruku." },
 ];
 
