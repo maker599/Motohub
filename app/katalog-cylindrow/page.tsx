@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, ChangeEvent } from "react";
 
 type CatalogItem = {
@@ -54,6 +55,7 @@ function validateCatalog(value: unknown): CatalogItem[] | null {
 }
 
 export default function KatalogCylindrowPage() {
+  const router = useRouter();
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [query, setQuery] = useState("");
@@ -139,7 +141,7 @@ export default function KatalogCylindrowPage() {
     setNotice("Usunięto wpis.");
   };
 
-  const useItem = (item: CatalogItem) => {
+  const applyItem = (item: CatalogItem) => {
     const prefill = {
       manufacturer: item.manufacturer,
       model: item.model,
@@ -152,7 +154,7 @@ export default function KatalogCylindrowPage() {
       notes: item.notes,
     };
     window.localStorage.setItem(PREFILL_KEY, JSON.stringify(prefill));
-    window.location.href = "/analiza-cylindra";
+    router.push("/analiza-cylindra");
   };
 
   const exportCatalog = () => {
@@ -247,7 +249,7 @@ export default function KatalogCylindrowPage() {
                   {item.partNumber && <p className="mt-3 text-xs text-zinc-500">Nr części: {item.partNumber}</p>}
                   {item.notes && <p className="mt-3 line-clamp-3 text-sm leading-6 text-zinc-400">{item.notes}</p>}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <button type="button" onClick={() => useItem(item)} className="rounded-full bg-white px-4 py-2 text-xs font-bold text-black hover:bg-zinc-200">Użyj w karcie pomiarów</button>
+                    <button type="button" onClick={() => applyItem(item)} className="rounded-full bg-white px-4 py-2 text-xs font-bold text-black hover:bg-zinc-200">Użyj w karcie pomiarów</button>
                     <button type="button" onClick={() => editItem(item)} className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/[0.05]">Edytuj</button>
                     {item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/[0.05]">Otwórz źródło ↗</a>}
                     <button type="button" onClick={() => removeItem(item.id)} className="rounded-full px-3 py-2 text-xs text-zinc-500 hover:text-red-300">Usuń</button>
