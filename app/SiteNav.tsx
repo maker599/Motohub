@@ -10,9 +10,8 @@ export default function SiteNav() {
       <div className="hidden items-center gap-1 rounded-xl bg-black/20 p-1 text-sm md:flex">
         <Link href="/motocykle" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Motocykle</Link>
         <Link href="/garaz" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Garaż</Link>
-        <Link href="/narzedzia" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Narzędzia</Link>
-        <Link href="/katalog-cylindrow" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Katalog cylindrów</Link>
-        <Link href="/analiza-cylindra" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Analiza cylindra</Link>
+        <Link href="/narzedzia/kalkulator" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">2T Exhaust Lab</Link>
+        <Link href="/narzedzia/tuning-2t" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Tuning 2T</Link>
         <Link href="/spolecznosc" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Społeczność</Link>
         <Link href="/profil" className="rounded-lg px-4 py-2 text-zinc-400 transition hover:text-white">Profil</Link>
       </div>
