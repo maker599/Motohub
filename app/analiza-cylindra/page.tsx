@@ -112,12 +112,35 @@ export default function CylinderAnalysisPage() {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
+      let nextProject: Project = blankProject;
       if (saved) {
         const parsed = safeProject(JSON.parse(saved));
-        if (parsed) setProject(parsed);
+        if (parsed) nextProject = parsed;
       }
+      const prefillRaw = window.localStorage.getItem("motohub-cylinder-prefill-v1");
+      if (prefillRaw) {
+        const prefill = JSON.parse(prefillRaw) as Partial<Project["part"]>;
+        nextProject = {
+          ...nextProject,
+          part: {
+            ...nextProject.part,
+            manufacturer: typeof prefill.manufacturer === "string" ? prefill.manufacturer : nextProject.part.manufacturer,
+            model: typeof prefill.model === "string" ? prefill.model : nextProject.part.model,
+            engine: typeof prefill.engine === "string" ? prefill.engine : nextProject.part.engine,
+            capacity: typeof prefill.capacity === "string" ? prefill.capacity : nextProject.part.capacity,
+            className: typeof prefill.className === "string" ? prefill.className : nextProject.part.className,
+            year: typeof prefill.year === "string" ? prefill.year : nextProject.part.year,
+            serial: typeof prefill.serial === "string" ? prefill.serial : nextProject.part.serial,
+            sourceUrl: typeof prefill.sourceUrl === "string" ? prefill.sourceUrl : nextProject.part.sourceUrl,
+            notes: typeof prefill.notes === "string" ? prefill.notes : nextProject.part.notes,
+          },
+        };
+        window.localStorage.removeItem("motohub-cylinder-prefill-v1");
+        setNotice("Dane części przeniesiono z katalogu. Sprawdź je przed dodaniem pomiarów.");
+      }
+      setProject(nextProject);
     } catch {
-      setNotice("Nie udało się odczytać lokalnego szkicu. Możesz rozpocząć nowy projekt.");
+      setNotice("Nie udało się odczytać lokalnego szkicu lub danych z katalogu. Możesz rozpocząć nowy projekt.");
     }
     setLoaded(true);
   }, []);
@@ -207,6 +230,7 @@ export default function CylinderAnalysisPage() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link href="/" className="text-sm font-semibold text-red-400 transition hover:text-red-300">← Powrót do MotoHub</Link>
+          <Link href="/katalog-cylindrow" className="text-sm font-semibold text-zinc-300 transition hover:text-white">Katalog cylindrów →</Link>
           <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-zinc-400">Warsztat · wersja robocza</span>
         </div>
 
