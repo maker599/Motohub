@@ -6,7 +6,7 @@ const features = [
   { title: "Twój garaż", text: "Zbieraj swoje motocykle w jednym miejscu i buduj własny wirtualny garaż.", href: "/garaz" },
   { title: "Społeczność", text: "Dziel się zajawką, poznawaj innych motocyklistów i rozmawiaj o motocyklach.", href: "/spolecznosc" },
   { title: "2T Exhaust Lab", text: "Projektuj i porównuj geometrię komory rezonansowej 2T, rozwinięcia stożków i zapisane karty cylindrów.", href: "/narzedzia/kalkulator" },
-  { title: "Tuning 2T", text: "Analizuj pojemność, prędkość tłoka, czasy portów, sprężanie i warunki otoczenia.", href: "/narzedzia/tuning-2t" },
+  { title: "Tuning 2T", text: "Szacuj zakres mocy z geometrii silnika, gaźnika, wydechu i danych z hamowni.", href: "/narzedzia/tuning-2t" },
 ];
 
 export default function Home() {
@@ -61,7 +61,17 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-8 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between lg:px-8"><p>© 2026 MotoHub. Zbudowane z pasji do motocykli.</p><p className="text-zinc-600">Ride your way.</p></div>
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-zinc-500 lg:px-8">
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/regulamin" className="transition hover:text-white">Regulamin</Link>
+            <Link href="/polityka-prywatnosci" className="transition hover:text-white">Polityka prywatności</Link>
+            <Link href="/cookies" className="transition hover:text-white">Cookies</Link>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>© 2026 MotoHub. Zbudowane z pasji do motocykli.</p>
+            <p className="text-zinc-600">Ride your way.</p>
+          </div>
+        </div>
       </footer>
     </main>
   );

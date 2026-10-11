@@ -3,51 +3,84 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import SiteNav from "../SiteNav";
+import { readLocalGarage, removeLocalGarageBike, updateLocalGarageMileage, type LocalGarageBike } from "../lib/local-garage";
+import ServiceLogPanel from "./ServiceLogPanel";
 
-type Item = {
-  id: string;
-  nickname: string | null;
-  mileage: number | null;
-  motorcycles: {
-    id?: string;
-    brand: string;
-    model: string;
-    year: number;
-    engine_cc: number | null;
-    power_hp: number | null;
-    motorcycle_type: string | null;
-  } | null;
-};
+type Item = LocalGarageBike;
 
 export default function GaragePage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [removing, setRemoving] = useState<string | null>(null);
+  const [localMode, setLocalMode] = useState(false);
 
   useEffect(() => {
-    fetch("/api/garage")
-      .then(async (r) => {
-        const d = await r.json();
-        if (!r.ok) setError(d.error ?? "Nie udało się pobrać garażu.");
-        else setItems(d.items ?? []);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Nie udało się połączyć z serwerem.");
-        setLoading(false);
-      });
+    let active = true;
+    async function loadGarage() {
+      try {
+        const authResponse = await fetch("/api/auth/me", { cache: "no-store" });
+        const authData = await authResponse.json();
+        if (!authData.user) {
+          if (active) {
+            setItems(readLocalGarage());
+            setLocalMode(true);
+          }
+          return;
+        }
+        const response = await fetch("/api/garage", { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) {
+          if (response.status === 401 || data.error === "Brak konfiguracji Supabase.") {
+            if (active) {
+              setItems(readLocalGarage());
+              setLocalMode(true);
+            }
+          } else if (active) setError(data.error ?? "Nie udało się pobrać garażu.");
+          return;
+        }
+        if (active) {
+          const localItems = readLocalGarage();
+          const remoteSlugs = new Set((data.items ?? []).map((item: Item) => item.motorcycles?.slug));
+          const additionalLocalItems = localItems.filter((item) => !remoteSlugs.has(item.motorcycles.slug));
+          setItems([...(data.items ?? []), ...additionalLocalItems]);
+          setLocalMode(additionalLocalItems.length > 0);
+        }
+      } catch {
+        if (active) {
+          setItems(readLocalGarage());
+          setLocalMode(true);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void loadGarage();
+    return () => { active = false; };
   }, []);
 
   async function remove(id: string) {
     setRemoving(id);
-    const r = await fetch("/api/garage", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    if (r.ok) setItems((current) => current.filter((item) => item.id !== id));
-    setRemoving(null);
+    setError("");
+    try {
+      if (id.startsWith("local:")) {
+        removeLocalGarageBike(id);
+        setItems((current) => current.filter((item) => item.id !== id));
+        return;
+      }
+      const response = await fetch("/api/garage", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+      if (response.ok) setItems((current) => current.filter((item) => item.id !== id));
+      else setError(data.error ?? "Nie udało się usunąć motocykla.");
+    } catch {
+      setError("Nie udało się połączyć z serwerem.");
+    } finally {
+      setRemoving(null);
+    }
   }
 
   const stats = useMemo(() => ({
@@ -88,6 +121,7 @@ export default function GaragePage() {
             </div>
           ) : (
             <>
+              {localMode && <p className="mt-5 rounded-xl border border-amber-300/15 bg-amber-300/[.035] px-4 py-3 text-xs leading-5 text-amber-100/75">Garaż lokalny: dane zapisują się w tej przeglądarce. Zaloguj się i skonfiguruj Supabase, aby synchronizować je między urządzeniami.</p>}
               <div className="mt-10 grid gap-3 md:grid-cols-3">
                 <div className="rounded-2xl border border-white/10 bg-white/[.03] p-5">
                   <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Motocykle</p>
@@ -133,8 +167,9 @@ export default function GaragePage() {
                             <div className="px-3 text-center"><p className="text-xs text-zinc-600">Moc</p><p className="mt-1 text-sm font-bold">{bike?.power_hp ?? "—"} <span className="font-normal text-zinc-600">KM</span></p></div>
                             <div className="px-3 text-center"><p className="text-xs text-zinc-600">Przebieg</p><p className="mt-1 text-sm font-bold">{item.mileage != null ? item.mileage.toLocaleString("pl-PL") : "—"}</p></div>
                           </div>
+                          <ServiceLogPanel garageId={item.id} motorcycleName={`${bike?.brand ?? ""} ${bike?.model ?? "Motocykl"}`} mileage={item.mileage} onMileageChange={(mileage) => { setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, mileage } : entry)); if (item.id.startsWith("local:")) updateLocalGarageMileage(item.id, mileage); }} />
                           <div className="mt-5 flex items-center justify-between gap-3">
-                            {bike?.id ? <Link href={`/motocykle/${bike.id}`} className="text-sm font-bold text-white transition hover:text-red-400">Zobacz motocykl →</Link> : <span />}
+                            {bike?.slug ? <Link href={`/motocykle/${encodeURIComponent(bike.slug)}`} className="text-sm font-bold text-white transition hover:text-red-400">Zobacz motocykl →</Link> : <span />}
                             <button onClick={() => remove(item.id)} disabled={removing === item.id} className="text-sm font-semibold text-zinc-600 transition hover:text-red-400 disabled:opacity-50">
                               {removing === item.id ? "Usuwanie..." : "Usuń"}
                             </button>

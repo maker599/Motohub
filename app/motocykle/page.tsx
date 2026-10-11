@@ -1,25 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SiteNav from "../SiteNav";
-
-const bikes = [
-  { id:"yamaha-mt07", brand:"Yamaha", model:"MT-07", year:2025, engine:"689 cm³", type:"Naked", power:"73 KM" },
-  { id:"honda-cbr650r", brand:"Honda", model:"CBR650R", year:2025, engine:"649 cm³", type:"Sport", power:"95 KM" },
-  { id:"bmw-r1300gs", brand:"BMW", model:"R 1300 GS", year:2025, engine:"1 300 cm³", type:"Adventure", power:"145 KM" },
-  { id:"kawasaki-z900", brand:"Kawasaki", model:"Z900", year:2025, engine:"948 cm³", type:"Naked", power:"125 KM" },
-  { id:"ducati-monster", brand:"Ducati", model:"Monster", year:2025, engine:"937 cm³", type:"Naked", power:"111 KM" },
-  { id:"ktm-890-adventure", brand:"KTM", model:"890 Adventure", year:2024, engine:"889 cm³", type:"Adventure", power:"105 KM" },
-];
-
-const types = ["Naked", "Sport", "Adventure", "Touring"];
-const brands = ["Yamaha", "Honda", "BMW", "Kawasaki", "Ducati", "KTM"];
+import type { Motorcycle } from "../lib/motorcycles";
 
 export default function MotorcyclesPage() {
+  const [bikes, setBikes] = useState<Motorcycle[]>([]);
   const [query, setQuery] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [demoMode, setDemoMode] = useState(false);
+  const types = useMemo(() => Array.from(new Set(bikes.map((bike) => bike.motorcycle_type).filter((type): type is string => Boolean(type))).values()).sort(), [bikes]);
+  const brands = useMemo(() => Array.from(new Set(bikes.map((bike) => bike.brand))).sort((a, b) => a.localeCompare(b, "pl")), [bikes]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/motorcycles", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error ?? "Nie udało się pobrać katalogu.");
+        if (active) {
+          setBikes(Array.isArray(data.items) ? data.items : []);
+          setDemoMode(Boolean(data.demoMode));
+        }
+      })
+      .catch((cause: unknown) => {
+        if (active) setError(cause instanceof Error ? cause.message : "Nie udało się połączyć z serwerem.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => { active = false; };
+  }, []);
 
   function toggle(value: string, setter: React.Dispatch<React.SetStateAction<string[]>>) {
     setter((current) => current.includes(value) ? current.filter((x) => x !== value) : [...current, value]);
@@ -28,12 +45,12 @@ export default function MotorcyclesPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return bikes.filter((bike) => {
-      const matchesQuery = !q || `${bike.brand} ${bike.model} ${bike.type}`.toLowerCase().includes(q);
-      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(bike.type);
+      const matchesQuery = !q || `${bike.brand} ${bike.model} ${bike.motorcycle_type ?? ""}`.toLowerCase().includes(q);
+      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(bike.motorcycle_type ?? "");
       const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(bike.brand);
       return matchesQuery && matchesType && matchesBrand;
     });
-  }, [query, selectedTypes, selectedBrands]);
+  }, [bikes, query, selectedTypes, selectedBrands]);
 
   function clearFilters() {
     setQuery("");
@@ -50,6 +67,9 @@ export default function MotorcyclesPage() {
           <h1 className="mt-3 text-5xl font-black tracking-tight">Znajdź swój motocykl.</h1>
           <p className="mt-4 max-w-2xl text-zinc-400">Przeglądaj modele, porównuj parametry i odkrywaj maszyny, które pasują do Twojego stylu jazdy.</p>
         </header>
+
+        {demoMode && <p className="mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/[.06] px-4 py-3 text-sm text-amber-200">Katalog demonstracyjny. Po skonfigurowaniu Supabase pokażą się zapisane tam motocykle.</p>}
+        {error && <p role="alert" className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/[.06] px-4 py-3 text-sm text-red-200">{error}</p>}
 
         <section>
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-2 shadow-xl shadow-black/20 backdrop-blur">
@@ -76,25 +96,31 @@ export default function MotorcyclesPage() {
             </div>
           </div>
 
-          <div className="mb-5 mt-5 flex items-center justify-between">
-            <p className="text-sm text-zinc-500"><span className="font-semibold text-zinc-300">{filtered.length}</span> {filtered.length === 1 ? "motocykl" : "motocykli"}</p>
-            {(selectedTypes.length > 0 || selectedBrands.length > 0 || query) && <p className="text-xs text-zinc-600">Aktywne filtry</p>}
-          </div>
-          {filtered.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-white/10 bg-white/[.02] p-12 text-center">
-              <p className="text-lg font-bold">Brak wyników</p>
-              <p className="mt-2 text-sm text-zinc-500">Zmień filtry albo wyszukiwaną frazę.</p>
-              <button onClick={clearFilters} className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black">Wyczyść filtry</button>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((bike) => (
-                <Link key={bike.id} href={"/motocykle/"+bike.id} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.03] transition hover:-translate-y-1 hover:border-red-500/30">
-                  <div className="flex aspect-[16/10] items-end bg-gradient-to-br from-zinc-700 via-zinc-900 to-black p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.type}</span></div>
-                  <div className="p-5"><p className="text-xs font-bold uppercase tracking-wider text-red-400">{bike.brand}</p><h2 className="mt-1 text-xl font-bold">{bike.model}</h2><div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500"><span>{bike.engine}</span><span>{bike.power}</span><span>{bike.year}</span><span>Sprawdź →</span></div></div>
-                </Link>
-              ))}
-            </div>
+          {loading ? (
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="h-72 animate-pulse rounded-3xl border border-white/10 bg-white/[.03]" />)}</div>
+          ) : error ? null : (
+            <>
+              <div className="mb-5 mt-5 flex items-center justify-between">
+                <p className="text-sm text-zinc-500"><span className="font-semibold text-zinc-300">{filtered.length}</span> {filtered.length === 1 ? "motocykl" : "motocykli"}</p>
+                {(selectedTypes.length > 0 || selectedBrands.length > 0 || query) && <p className="text-xs text-zinc-600">Aktywne filtry</p>}
+              </div>
+              {filtered.length === 0 ? (
+                <div className="rounded-3xl border border-dashed border-white/10 bg-white/[.02] p-12 text-center">
+                  <p className="text-lg font-bold">{bikes.length ? "Brak wyników" : "Katalog jest pusty"}</p>
+                  <p className="mt-2 text-sm text-zinc-500">{bikes.length ? "Zmień filtry albo wyszukiwaną frazę." : "Dodaj motocykle w tabeli motorcycles w Supabase."}</p>
+                  {(selectedTypes.length > 0 || selectedBrands.length > 0 || query) && <button onClick={clearFilters} className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black">Wyczyść filtry</button>}
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {filtered.map((bike) => (
+                    <Link key={bike.slug} href={`/motocykle/${encodeURIComponent(bike.slug)}`} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.03] transition hover:-translate-y-1 hover:border-red-500/30">
+                      <div className="flex aspect-[16/10] items-end bg-gradient-to-br from-zinc-700 via-zinc-900 to-black p-5"><span className="rounded-full bg-black/50 px-3 py-1 text-xs text-zinc-300">{bike.motorcycle_type ?? "Motocykl"}</span></div>
+                      <div className="p-5"><p className="text-xs font-bold uppercase tracking-wider text-red-400">{bike.brand}</p><h2 className="mt-1 text-xl font-bold">{bike.model}</h2><div className="mt-4 grid grid-cols-2 gap-2 text-xs text-zinc-500"><span>{bike.engine_cc ?? "—"} cm³</span><span>{bike.power_hp ?? "—"} KM</span><span>{bike.year}</span><span>Sprawdź →</span></div></div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>

@@ -1,58 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MotoHub
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
+Polskojęzyczna aplikacja dla motocyklistów z katalogiem motocykli, garażem użytkownika, społecznością i narzędziami do silników 2T. Projekt używa Next.js App Router, React, TypeScript i Tailwind CSS.
 
 ## Uruchomienie lokalne
 
-Wymagania: Node.js 22 lub nowszy oraz npm.
+Wymagane: Node.js 22 lub nowszy oraz npm.
 
-```bash
+```powershell
 npm ci
+Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Następnie otwórz http://localhost:3000.
+Otwórz http://localhost:3000. Bez konfiguracji Supabase katalog i społeczność pokazują dane demonstracyjne; kalkulatory działają lokalnie w przeglądarce.
 
-## Kontrola i kompilacja produkcyjna
+## Supabase
 
-```bash
+Aby włączyć konta, garaż, katalog z bazy i publikowanie postów oraz komentarzy:
+
+1. Utwórz projekt Supabase.
+2. W pliku `.env.local` ustaw `SUPABASE_URL` oraz `SUPABASE_ANON_KEY`.
+3. Wykonaj [supabase/schema.sql](supabase/schema.sql) w SQL Editor projektu.
+
+Karty cylindrów z 2T Exhaust Lab są na razie zapisywane w `localStorage` tej przeglądarki. Można je wyeksportować do pliku JSON.
+
+## Główne strony
+
+- `/` — strona startowa
+- `/motocykle` — katalog i filtry
+- `/garaz` — garaż zalogowanego użytkownika
+- `/spolecznosc` — wpisy i komentarze
+- `/narzedzia/kalkulator` — 2T Exhaust Lab i karty cylindrów
+- `/narzedzia/tuning-2t` — analizator parametrów silnika 2T
+- `/logowanie`, `/rejestracja`, `/profil` — konto użytkownika
+
+## Kontrola i kompilacja
+
+```powershell
 npm run lint
 npm run build
 npm start
 ```
 
-Projekt zawiera workflow GitHub Actions w `.github/workflows/build.yml`, który uruchamia lint i build przy zmianach na gałęzi `main` oraz przy pull requestach.
+GitHub Actions uruchamia lint i build przy zmianach na `main` oraz przy pull requestach.

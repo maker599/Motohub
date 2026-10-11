@@ -2,7 +2,14 @@
 
 :root {
   --background: #090909;
+  --background-soft: #111315;
   --foreground: #ffffff;
+  --muted: #a1a1aa;
+  --border: rgba(255, 255, 255, 0.08);
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-strong: rgba(255, 255, 255, 0.06);
+  --brand: #ef4444;
+  --brand-soft: rgba(239, 68, 68, 0.12);
 }
 
 * {
@@ -11,11 +18,16 @@
 
 html {
   background: var(--background);
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  background: var(--background);
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(239, 68, 68, 0.08), transparent 34%),
+    linear-gradient(180deg, #0b0b0c 0%, #090909 55%, #0b0b0c 100%);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -24,7 +36,177 @@ a {
   text-decoration: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 ::selection {
   background: #ef4444;
   color: #ffffff;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+
+  body,
+  html {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  .shopping-print,
+  .shopping-print * {
+    color: #222222 !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  .shopping-screen-only,
+  .shopping-print nav,
+  .shopping-page-intro {
+    display: none !important;
+  }
+
+  .shopping-pdf-only {
+    display: block !important;
+  }
+
+  .shopping-print-header {
+    display: flex !important;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    align-items: flex-start;
+    gap: 24px;
+    border-bottom: 2px solid #b91c1c;
+    padding: 0 0 14px;
+    margin: 0 0 20px;
+  }
+
+  .shopping-print-brand {
+    margin: 0;
+    color: #b91c1c !important;
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .shopping-print-subtitle {
+    margin: 2px 0 0;
+    font-size: 9px;
+    font-weight: 700;
+  }
+
+  .shopping-print-meta {
+    display: grid;
+    gap: 3px;
+    text-align: left;
+    font-size: 11px;
+  }
+
+  .shopping-print-meta h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .shopping-print-meta p {
+    margin: 2px 0 0;
+  }
+
+  .shopping-pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .shopping-pdf-table th {
+    padding: 9px 7px;
+    border-bottom: 1.5px solid #444;
+    text-align: left;
+    font-size: 10px;
+  }
+
+  .shopping-pdf-table td {
+    padding: 10px 7px;
+    border-bottom: 1px solid #dddddd;
+    vertical-align: top;
+  }
+
+  .shopping-pdf-table th:nth-child(n + 3),
+  .shopping-pdf-table td:nth-child(n + 3) {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .shopping-pdf-table tr {
+    break-inside: avoid;
+  }
+
+  .shopping-pdf-table td:first-child {
+    width: 42%;
+  }
+
+  .shopping-pdf-table a {
+    color: #222222 !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .shopping-pdf-category {
+    display: block;
+    margin-bottom: 3px;
+    color: #666666 !important;
+    font-size: 9px;
+  }
+
+  .shopping-pdf-summary {
+    width: min(100%, 320px);
+    margin: 18px 0 0 auto;
+  }
+
+  .shopping-pdf-summary > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 5px 0;
+    border-bottom: 1px solid #dddddd;
+    font-size: 11px;
+  }
+
+  .shopping-pdf-summary .shopping-pdf-total {
+    margin-top: 5px;
+    border-top: 1.5px solid #333333;
+    border-bottom: 0;
+    padding-top: 9px;
+    font-size: 14px;
+  }
+
+  .shopping-pdf-footnote {
+    margin-top: 24px;
+    color: #666666 !important;
+    font-size: 9px;
+  }
+
+  .shopping-print aside {
+    position: static !important;
+    border-color: #cccccc !important;
+  }
+
+}
+
+.shopping-pdf-only {
+  display: none;
 }

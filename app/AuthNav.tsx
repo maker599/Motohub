@@ -10,7 +10,6 @@ export default function AuthNav() {
   const pathname = usePathname();
 
   useEffect(() => {
-    setReady(false);
     fetch("/api/auth/me", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : { user: null })
       .then((data) => setLoggedIn(Boolean(data.user)))
